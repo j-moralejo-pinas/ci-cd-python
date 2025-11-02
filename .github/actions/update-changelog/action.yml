@@ -2,6 +2,10 @@ name: Update Changelog
 description: Slice changelog between releases and update CHANGELOG.rst
 
 inputs:
+  workflow_type:
+    description: 'Type of workflow (gitflow or github-flow)'
+    required: false
+    default: 'gitflow'
   gh_token:
     description: 'GitHub token for gh CLI'
     required: true
@@ -12,6 +16,18 @@ inputs:
     description: 'Path to the changelog file'
     required: false
     default: 'CHANGELOG.rst'
+  major-branch-patterns:
+    description: 'Comma-separated list of branch patterns for major version bumps (e.g., "major/,breaking/")'
+    required: false
+    default: 'major/'
+  hotfix-branch-patterns:
+    description: 'Comma-separated list of branch patterns for hotfix/patch version bumps (e.g., "hotfix/,patch/")'
+    required: false
+    default: 'fix/,hotfix/,bugfix/'
+  meta-branch-patterns:
+    description: 'Comma-separated list of branch patterns for non-version-bumping branches (e.g., "meta/,docs/")'
+    required: false
+    default: 'meta/'
 
 outputs:
   did_push:
@@ -29,32 +45,43 @@ runs:
         fetch-depth: 0
         fetch-tags: true
 
-    # Detect branch type and current PR number (if available)
-    - name: Detect branch type and PR number
+    # Detect branch type using the detect-branch-type action
+    - name: Detect branch type
+      id: branch-type
+      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/detect-branch-type@main
+      with:
+        head-branch: ${{ github.head_ref || github.ref_name }}
+        major-branch-patterns: ${{ inputs.major-branch-patterns }}
+        hotfix-branch-patterns: ${{ inputs.hotfix-branch-patterns }}
+        meta-branch-patterns: ${{ inputs.meta-branch-patterns }}
+
+    # Set convenience variables based on branch type
+    - name: Set branch flags
       id: meta
       shell: bash
       env:
-        PR_NUMBER: ${{ github.event.pull_request.number }}
+        BRANCH_TYPE: ${{ steps.branch-type.outputs.branch-type }}
       run: |
-        BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
-        echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
-        if [[ "$BRANCH" == hotfix/* ]]; then
+        if [[ "$BRANCH_TYPE" == "hotfix" ]]; then
           echo "is_hotfix=true" >> "$GITHUB_OUTPUT"
         else
           echo "is_hotfix=false" >> "$GITHUB_OUTPUT"
         fi
-        if [[ "$BRANCH" == meta/* ]]; then
+        if [[ "$BRANCH_TYPE" == "meta" ]]; then
           echo "is_meta=true" >> "$GITHUB_OUTPUT"
         else
           echo "is_meta=false" >> "$GITHUB_OUTPUT"
         fi
-        echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
 
     # Compute the new version as the first step
     - name: Compute new version
       id: semver
       if: ${{ steps.meta.outputs.is_meta != 'true' }}
       uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/find-next-semver@main
+      with:
+        major-branch-patterns: ${{ inputs.major-branch-patterns }}
+        hotfix-branch-patterns: ${{ inputs.hotfix-branch-patterns }}
+        meta-branch-patterns: ${{ inputs.meta-branch-patterns }}
 
     # Detect last version present in CHANGELOG.rst (first header starting with '## vX.Y.Z - YYYY-MM-DD')
     - name: Determine last CHANGELOG version
@@ -75,7 +102,7 @@ runs:
 
     - name: Find previous release cut
       id: previous_cut
-      if: ${{ steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
+      if: ${{ inputs.workflow_type == 'gitflow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
       uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/find-previous-release-cut@main
       with:
         dev_branch: dev
@@ -83,14 +110,14 @@ runs:
 
     - name: Find current release cut
       id: current_cut
-      if: ${{ steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
+      if: ${{ inputs.workflow_type == 'gitflow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
       uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/find-current-release-cut@main
       with:
         dev_branch: dev
 
     - name: Find PRs on dev between cuts
       id: prs
-      if: ${{ steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' && steps.meta.outputs.is_hotfix != 'true' }}
+      if: ${{ inputs.workflow_type == 'gitflow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' && steps.meta.outputs.is_hotfix != 'true' }}
       uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/find-prs-between-cuts@main
       with:
         token: ${{ inputs.gh_token }}
@@ -105,8 +132,8 @@ runs:
       if: ${{ steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
       shell: bash
       run: |
-        if [[ "${{ steps.meta.outputs.is_hotfix }}" == "true" ]]; then
-          echo "numbers=${{ steps.meta.outputs.pr_number }}" >> "$GITHUB_OUTPUT"
+        if [[ "${{ inputs.workflow_type }}" != "gitflow" ]] || [[ "${{ steps.meta.outputs.is_hotfix }}" == "true" ]]; then
+          echo "numbers=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
         else
           echo "numbers=${{ steps.prs.outputs.numbers }}" >> "$GITHUB_OUTPUT"
         fi

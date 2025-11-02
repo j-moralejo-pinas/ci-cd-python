@@ -6,6 +6,14 @@ inputs:
     description: Personal Access Token with permission to push tags
     required: true
     default: ''
+  major-branch-patterns:
+    description: 'Comma-separated list of branch patterns for major version bumps (e.g., "major/,breaking/")'
+    required: false
+    default: 'major/'
+  hotfix-branch-patterns:
+    description: 'Comma-separated list of branch patterns for hotfix/patch version bumps (e.g., "hotfix/,patch/")'
+    required: false
+    default: 'fix/,hotfix/,bugfix/'
 
 
 outputs:
@@ -27,6 +35,9 @@ runs:
     - name: Find latest and next semver
       id: find
       uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/find-next-semver@main
+      with:
+        major-branch-patterns: ${{ inputs.major-branch-patterns }}
+        hotfix-branch-patterns: ${{ inputs.hotfix-branch-patterns }}
 
     - name: Configure git user for tagging
       uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/git-config@main

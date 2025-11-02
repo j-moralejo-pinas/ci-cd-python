@@ -2,6 +2,12 @@ name: dev_pr
 
 on:
   workflow_call:
+    inputs:
+      workflow_type:
+        description: 'Type of workflow (gitflow or github-flow)'
+        required: false
+        type: string
+        default: 'gitflow'
     secrets:
       PAT_TOKEN:
         required: true

@@ -16,7 +16,12 @@ runs:
       with:
         python-version: ${{ steps.python-version.outputs.min_python_version }}
 
-    - name: Install dependencies and run tests
+    - name: Install test dependencies
+      shell: bash
+      run: |
+        bash "${GITHUB_ACTION_PATH}/install-deps.sh"
+
+    - name: Run tests
       shell: bash
       run: |
         bash "${GITHUB_ACTION_PATH}/run-tests.sh"

@@ -1,6 +1,12 @@
 name: Code Quality
 description: Install code quality dependencies and run pydoclint, ruff check, and pyright.
 
+inputs:
+  stop-on-failure:
+    description: 'Whether to stop execution when code quality checks fail'
+    required: false
+    default: 'true'
+
 runs:
   using: composite
   steps:
@@ -18,5 +24,7 @@ runs:
 
     - name: Install code-quality deps and run checks
       shell: bash
+      env:
+        STOP_ON_FAILURE: ${{ inputs.stop-on-failure }}
       run: |
         bash "${GITHUB_ACTION_PATH}/run-code-quality.sh"

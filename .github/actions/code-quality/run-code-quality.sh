@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
-set -euo pipefail
+
+# Read configuration
+STOP_ON_FAILURE="${STOP_ON_FAILURE:-true}"
+
+# Set bash options based on stop-on-failure setting
+if [[ "${STOP_ON_FAILURE}" == "true" ]]; then
+    set -euo pipefail  # Stop on first failure (original behavior)
+else
+    set -uo pipefail   # Continue on failures, but still catch undefined vars and pipe failures
+fi
 
 # Upgrade pip and install PDM
 python -m pip install --upgrade pip

@@ -2,6 +2,12 @@ name: main_pr
 
 on:
   workflow_call:
+    inputs:
+      workflow_type:
+        description: 'Type of workflow (gitflow or github-flow)'
+        required: true
+        type: string
+        default: 'gitflow'
     secrets:
       PAT_TOKEN:
         required: true
@@ -18,8 +24,8 @@ jobs:
       - name: Validate source branch
         uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/check-source-branch@main
         with:
-          allowed_branches: dev
-          allowed_prefixes: hotfix/,release/,meta/,major/
+          allowed_branches: ${{ inputs.workflow_type == 'gitflow' && 'dev' || '' }}
+          allowed_prefixes: ${{ inputs.workflow_type == 'gitflow' && 'hotfix/,release/,meta/,major/' || 'feature/,bugfix/,fix/,hotfix/,meta/,major/' }}
 
   update-changelog:
     name: update-changelog
@@ -32,6 +38,7 @@ jobs:
         id: update-changelog
         uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/update-changelog@main
         with:
+          workflow_type: ${{ inputs.workflow_type }}
           pat_token: ${{ secrets.PAT_TOKEN }}
           gh_token: ${{ github.token }}
 

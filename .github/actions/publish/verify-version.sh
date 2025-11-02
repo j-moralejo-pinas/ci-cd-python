@@ -10,9 +10,9 @@ EXPECTED="${2:-}"
 
 # Prefer local venv created in previous step if present
 if [[ -x .venv_test/bin/python ]]; then
-  PYBIN="./.venv_test/bin/python"
+    PYBIN="./.venv_test/bin/python"
 else
-  PYBIN="python"
+    PYBIN="python"
 fi
 
 "${PYBIN}" - <<'PY'
