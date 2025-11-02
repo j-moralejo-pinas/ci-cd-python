@@ -19,6 +19,7 @@ echo "Repository status before committing:"
 git status --short || echo "(no git status output)"
 
 # Check if there are any changes to commit
+git add -A
 if git diff --quiet; then
   echo "No changes detected — skipping commit."
   echo "has_changes=false" >> "${GITHUB_OUTPUT:-/dev/null}"
@@ -74,7 +75,6 @@ git diff --name-only
 # Create commit
 echo "Creating commit..."
 set -x
-git add -A
 git commit -m "${final_msg}"
 set +x
 
