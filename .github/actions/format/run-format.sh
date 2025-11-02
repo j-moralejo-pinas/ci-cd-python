@@ -21,7 +21,7 @@ pdm run ruff format .
 
 # Run docformatter: exit code 0 = ok, 3 = changes made; others should fail
 set +e
-pdm run docformatter src/
+pdm run docformatter -i -r src/
 code=$?
 set -e
 if [[ "$code" != "0" && "$code" != "3" ]]; then
