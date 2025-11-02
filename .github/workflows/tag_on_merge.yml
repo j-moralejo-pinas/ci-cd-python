@@ -2,12 +2,6 @@ name: tag_on_merge
 
 on:
   workflow_call:
-    inputs:
-      workflow_type:
-        description: 'Type of workflow (gitflow or github_flow)'
-        required: false
-        type: string
-        default: 'gitflow'
     secrets:
       PAT_TOKEN:
         required: true
@@ -20,10 +14,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  get-workflow-type:
+    runs-on: ubuntu-latest
+    outputs:
+      workflow_type: ${{ steps.get-workflow.outputs.workflow_type }}
+    steps:
+      - name: Get workflow type from pyproject.toml
+        id: get-workflow
+        uses: j-moralejo-pinas/ci-cd-python/.github/actions/get-workflow-type@main
+
   semver-tag:
     name: semver-tag
     if: github.event.pull_request.merged == true && !startsWith(github.event.pull_request.head.ref, 'meta')
     runs-on: ubuntu-latest
+    needs: get-workflow-type
     steps:
       - name: Run semver tag action
         id: semver
