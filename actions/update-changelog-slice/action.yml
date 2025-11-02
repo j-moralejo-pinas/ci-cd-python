@@ -1,0 +1,30 @@
+name: Update Changelog Slice
+description: Build grouped changelog content from PR bodies and prepend a new entry to the changelog file.
+
+inputs:
+  token:
+    description: GitHub token for gh CLI
+    required: true
+  prs:
+    description: Space-separated list of PR numbers to include
+    required: true
+  version:
+    description: Tag for the new changelog entry (e.g., vX.Y.Z)
+    required: true
+  changelog_path:
+    description: Path to the changelog file to update
+    required: false
+    default: CHANGELOG.rst
+
+runs:
+  using: composite
+  steps:
+    - name: Build and prepend changelog slice
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        PRS: ${{ inputs.prs }}
+        VERSION: ${{ inputs.version }}
+        CHANGELOG_PATH: ${{ inputs.changelog_path }}
+      run: |
+        bash "${GITHUB_ACTION_PATH}/update-changelog-slice.sh"

@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Get workflow type from pyproject.toml
         id: get-workflow
-        uses: j-moralejo-pinas/ci-cd-python/.github/actions/get-workflow-type@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/get-workflow-type@main
 
   check-source-branch:
     name: check-source-branch
@@ -26,7 +26,7 @@ jobs:
     needs: get-workflow-type
     steps:
       - name: Validate source branch
-        uses: j-moralejo-pinas/ci-cd-python/.github/actions/check-source-branch@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/check-source-branch@main
         with:
           allowed_branches: ${{ needs.get-workflow-type.outputs.workflow_type == 'gitflow' && 'dev' || '' }}
           allowed_prefixes: ${{ needs.get-workflow-type.outputs.workflow_type == 'gitflow' && 'hotfix/,release/,meta/,major/' || 'feature/,bugfix/,fix/,hotfix/,meta/,major/' }}
@@ -40,7 +40,7 @@ jobs:
     steps:
       - name: Update changelog
         id: update-changelog
-        uses: j-moralejo-pinas/ci-cd-python/.github/actions/update-changelog@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/update-changelog@main
         with:
           workflow_type: ${{ needs.get-workflow-type.outputs.workflow_type }}
           pat_token: ${{ secrets.PAT_TOKEN }}
@@ -56,7 +56,7 @@ jobs:
     steps:
       - name: Run format action
         id: format
-        uses: j-moralejo-pinas/ci-cd-python/.github/actions/format@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/format@main
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
 
@@ -67,7 +67,7 @@ jobs:
     if: needs.format.outputs.did_push != 'true'
     steps:
       - name: Run code quality action
-        uses: j-moralejo-pinas/ci-cd-python/.github/actions/code-quality@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/code-quality@main
 
   test:
     name: test
@@ -75,4 +75,4 @@ jobs:
     needs: [get-workflow-type, code-quality]
     steps:
       - name: Run test action
-        uses: j-moralejo-pinas/ci-cd-python/.github/actions/test@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/test@main

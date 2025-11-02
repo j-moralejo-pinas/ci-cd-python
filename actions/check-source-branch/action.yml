@@ -1,0 +1,23 @@
+name: Check Source Branch
+description: Validate that the PR source branch is allowed.
+
+inputs:
+  allowed_branches:
+    description: Comma-separated list of exact branch names allowed (e.g., dev,staging)
+    required: false
+    default: dev
+  allowed_prefixes:
+    description: Comma-separated list of allowed branch prefixes (e.g., hotfix/,release/)
+    required: false
+    default: hotfix/,release/
+
+runs:
+  using: composite
+  steps:
+    - name: Validate source branch
+      shell: bash
+      run: |
+        bash "${GITHUB_ACTION_PATH}/check-source-branch.sh" \
+          "${{ github.head_ref || github.ref_name }}" \
+          "${{ inputs.allowed_branches }}" \
+          "${{ inputs.allowed_prefixes }}"
