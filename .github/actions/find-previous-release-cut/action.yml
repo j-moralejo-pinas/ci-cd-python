@@ -1,0 +1,29 @@
+name: Find Previous Release Cut
+description: Determine the previous release cut point on dev. Returns initial commit if no previous release exists.
+
+inputs:
+  dev_branch:
+    description: Name of the development branch
+    required: false
+    default: dev
+  main_branch:
+    description: Name of the main branch
+    required: false
+    default: main
+
+outputs:
+  prev_cut:
+    description: Previous release cut (fork point from dev to latest x.y.0 tag merge, or initial commit)
+    value: ${{ steps.run.outputs.prev_cut }}
+
+runs:
+  using: composite
+  steps:
+    - name: Compute previous release cut
+      id: run
+      shell: bash
+      env:
+        DEV_BRANCH: ${{ inputs.dev_branch }}
+        MAIN_BRANCH: ${{ inputs.main_branch }}
+      run: |
+        bash "${GITHUB_ACTION_PATH}/find-previous-release-cut.sh"

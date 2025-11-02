@@ -1,0 +1,24 @@
+name: Find Next Semver
+description: Determine latest semantic version tag and compute the next one based on PR context.
+
+outputs:
+  latest:
+    description: Latest tag found in the repository (vX.Y.Z)
+    value: ${{ steps.run.outputs.latest }}
+  new_tag:
+    description: Next tag to create (vX.Y.Z)
+    value: ${{ steps.run.outputs.new_tag }}
+  version:
+    description: Version without leading v (X.Y.Z)
+    value: ${{ steps.run.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Find latest and compute next semver
+      id: run
+      shell: bash
+      env:
+        HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+      run: |
+        bash "${GITHUB_ACTION_PATH}/find-next-semver.sh"

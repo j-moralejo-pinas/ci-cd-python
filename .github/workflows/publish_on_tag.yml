@@ -1,0 +1,35 @@
+name: publish_on_tag
+
+on:
+  workflow_call:
+    secrets:
+      TEST_PYPI_API_TOKEN:
+        required: true
+      PYPI_API_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Derive version from tag
+        id: version
+        run: |
+          REF=${GITHUB_REF#refs/tags/}
+          echo "version=${REF#v}" >> "$GITHUB_OUTPUT"
+          echo "tag=$REF" >> "$GITHUB_OUTPUT"
+      - name: Publish
+        uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/publish@main
+        with:
+          tag: ${{ steps.version.outputs.tag }}
+          version: ${{ steps.version.outputs.version }}
+          test_pypi_token: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          pypi_token: ${{ secrets.PYPI_API_TOKEN }}

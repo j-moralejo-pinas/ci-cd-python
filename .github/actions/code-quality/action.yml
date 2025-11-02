@@ -1,0 +1,22 @@
+name: Code Quality
+description: Install code quality dependencies and run pydoclint, ruff check, and pyright.
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Get minimum Python version
+      id: python-version
+      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/get-min-python-version@main
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ steps.python-version.outputs.min_python_version }}
+
+    - name: Install code-quality deps and run checks
+      shell: bash
+      run: |
+        bash "${GITHUB_ACTION_PATH}/run-code-quality.sh"

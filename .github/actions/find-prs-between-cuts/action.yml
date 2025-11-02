@@ -1,0 +1,40 @@
+name: Find PRs Between Cuts
+description: Find PR numbers on the dev branch between two cut points.
+
+inputs:
+  token:
+    description: GitHub token for gh CLI
+    required: true
+  repo:
+    description: owner/repo slug
+    required: true
+  dev_branch:
+    description: Name of the development branch
+    required: false
+    default: dev
+  prev_cut:
+    description: Previous cut commit SHA
+    required: true
+  cur_cut:
+    description: Current cut commit SHA
+    required: true
+
+outputs:
+  numbers:
+    description: Space-separated PR numbers between cuts
+    value: ${{ steps.run.outputs.numbers }}
+
+runs:
+  using: composite
+  steps:
+    - name: Locate PRs between cuts
+      id: run
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        REPO_SLUG: ${{ inputs.repo }}
+        DEV_BRANCH: ${{ inputs.dev_branch }}
+        PREV_CUT: ${{ inputs.prev_cut }}
+        CUR_CUT: ${{ inputs.cur_cut }}
+      run: |
+        bash "${GITHUB_ACTION_PATH}/find-prs-between-cuts.sh"

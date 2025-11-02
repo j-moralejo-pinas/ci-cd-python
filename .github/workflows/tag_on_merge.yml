@@ -1,0 +1,26 @@
+name: tag_on_merge
+
+on:
+  workflow_call:
+    secrets:
+      PAT_TOKEN:
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  semver-tag:
+    name: semver-tag
+    if: github.event.pull_request.merged == true && !startsWith(github.event.pull_request.head.ref, 'meta')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run semver tag action
+        id: semver
+        with:
+          pat_token: ${{ secrets.PAT_TOKEN }}
+        uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/semver-tag@main

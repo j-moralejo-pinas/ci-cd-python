@@ -1,0 +1,30 @@
+name: Compare Versions
+description: Compare semantic versions and output whether the new version is strictly greater than the previous one.
+
+inputs:
+  new_tag:
+    description: New tag value (e.g., v1.2.3 or 1.2.3)
+    required: true
+  last_tag:
+    description: Previous tag value (e.g., v1.2.2 or empty)
+    required: false
+    default: ''
+
+outputs:
+  result:
+    description: true if new_tag > last_tag or last_tag is empty; otherwise false
+    value: ${{ steps.compare.outputs.result }}
+
+runs:
+  using: composite
+  steps:
+    - name: Compare versions
+      id: compare
+      shell: bash
+      env:
+        NEW_TAG: ${{ inputs.new_tag }}
+        LAST_TAG: ${{ inputs.last_tag }}
+      run: |
+        bash "${GITHUB_ACTION_PATH}/compare-versions.sh" \
+          "${NEW_TAG}" \
+          "${LAST_TAG}"

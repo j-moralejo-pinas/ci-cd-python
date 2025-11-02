@@ -1,0 +1,23 @@
+name: Get Minimum Python Version
+description: Extract the minimum Python version requirement from pyproject.toml
+
+inputs:
+  pyproject_path:
+    description: Path to the pyproject.toml file
+    required: false
+    default: 'pyproject.toml'
+
+outputs:
+  min_python_version:
+    description: The minimum Python version (e.g., '3.8', '3.9.2')
+    value: ${{ steps.get_version.outputs.min_python_version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get minimum Python version
+      id: get_version
+      shell: bash
+      run: |
+        bash "${GITHUB_ACTION_PATH}/get-min-python-version.sh" \
+          "${{ inputs.pyproject_path }}"
