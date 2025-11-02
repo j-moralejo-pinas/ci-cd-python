@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       workflow_type:
-        description: 'Type of workflow (gitflow or github-flow)'
+        description: 'Type of workflow (gitflow or github_flow)'
         required: false
         type: string
         default: 'gitflow'
