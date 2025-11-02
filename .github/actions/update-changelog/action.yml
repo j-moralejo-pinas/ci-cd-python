@@ -48,7 +48,7 @@ runs:
     # Detect branch type using the detect-branch-type action
     - name: Detect branch type
       id: branch-type
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/detect-branch-type@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/detect-branch-type@main
       with:
         head-branch: ${{ github.head_ref || github.ref_name }}
         major-branch-patterns: ${{ inputs.major-branch-patterns }}
@@ -77,7 +77,7 @@ runs:
     - name: Compute new version
       id: semver
       if: ${{ steps.meta.outputs.is_meta != 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/find-next-semver@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/find-next-semver@main
       with:
         major-branch-patterns: ${{ inputs.major-branch-patterns }}
         hotfix-branch-patterns: ${{ inputs.hotfix-branch-patterns }}
@@ -87,7 +87,7 @@ runs:
     - name: Determine last CHANGELOG version
       id: changelog_last
       if: ${{ steps.meta.outputs.is_meta != 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/get-last-changelog-version@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/get-last-changelog-version@main
       with:
         changelog_path: ${{ inputs.changelog_path }}
 
@@ -95,7 +95,7 @@ runs:
     - name: Check if new version is above last changelog version
       id: should_run
       if: ${{ steps.meta.outputs.is_meta != 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/compare-versions@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/compare-versions@main
       with:
         new_tag: ${{ steps.semver.outputs.new_tag }}
         last_tag: ${{ steps.changelog_last.outputs.last_tag }}
@@ -103,7 +103,7 @@ runs:
     - name: Find previous release cut
       id: previous_cut
       if: ${{ inputs.workflow_type == 'gitflow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/find-previous-release-cut@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/find-previous-release-cut@main
       with:
         dev_branch: dev
         main_branch: main
@@ -111,14 +111,14 @@ runs:
     - name: Find current release cut
       id: current_cut
       if: ${{ inputs.workflow_type == 'gitflow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/find-current-release-cut@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/find-current-release-cut@main
       with:
         dev_branch: dev
 
     - name: Find PRs on dev between cuts
       id: prs
       if: ${{ inputs.workflow_type == 'gitflow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' && steps.meta.outputs.is_hotfix != 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/find-prs-between-cuts@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/find-prs-between-cuts@main
       with:
         token: ${{ inputs.gh_token }}
         repo: ${{ github.repository }}
@@ -140,7 +140,7 @@ runs:
 
     - name: Build and prepend changelog slice
       if: ${{ steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/update-changelog-slice@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/update-changelog-slice@main
       with:
         token: ${{ inputs.gh_token }}
         prs: ${{ steps.prs_input.outputs.numbers }}
@@ -149,7 +149,7 @@ runs:
 
     - name: Commit and push changelog
       id: commit_push
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/commit-push@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/commit-push@main
       with:
         pat: ${{ inputs.pat_token }}
         message: "chore: update changelog for ${{ steps.semver.outputs.new_tag }}"

@@ -34,13 +34,13 @@ runs:
 
     - name: Find latest and next semver
       id: find
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/find-next-semver@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/find-next-semver@main
       with:
         major-branch-patterns: ${{ inputs.major-branch-patterns }}
         hotfix-branch-patterns: ${{ inputs.hotfix-branch-patterns }}
 
     - name: Configure git user for tagging
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/git-config@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/git-config@main
 
     - name: Tag merge commit
       shell: bash

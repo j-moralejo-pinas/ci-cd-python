@@ -31,7 +31,7 @@ runs:
   steps:
     - name: Detect branch type
       id: branch-type
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/detect-branch-type@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/detect-branch-type@main
       with:
         head-branch: ${{ github.event.pull_request.head.ref || github.ref_name }}
         major-branch-patterns: ${{ inputs.major-branch-patterns }}

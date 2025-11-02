@@ -26,7 +26,7 @@ runs:
   using: composite
   steps:
     - name: Configure Git user
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/git-config@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/git-config@main
 
     - name: Commit changes if any
       id: commit

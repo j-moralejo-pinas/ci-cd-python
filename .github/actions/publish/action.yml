@@ -27,7 +27,7 @@ runs:
 
     - name: Get minimum Python version
       id: python-version
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/get-min-python-version@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/get-min-python-version@main
 
     - name: Set up Python
       uses: actions/setup-python@v5

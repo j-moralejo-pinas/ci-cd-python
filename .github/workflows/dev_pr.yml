@@ -29,7 +29,7 @@ jobs:
     steps:
       - name: Run format action
         id: format
-        uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/format@main
+        uses: j-moralejo-pinas/ci-cd-python/.github/actions/format@main
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
 
@@ -40,4 +40,4 @@ jobs:
     if: needs.format.outputs.did_push != 'true'
     steps:
       - name: Run test action
-        uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/test@main
+        uses: j-moralejo-pinas/ci-cd-python/.github/actions/test@main

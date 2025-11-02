@@ -33,4 +33,4 @@ jobs:
         id: semver
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
-        uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/semver-tag@main
+        uses: j-moralejo-pinas/ci-cd-python/.github/actions/semver-tag@main

@@ -37,7 +37,7 @@ runs:
     - name: Get minimum Python version
       if: steps.skip_autofix.outputs.skip == 'no'
       id: python-version
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/get-min-python-version@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/get-min-python-version@main
 
     - name: Set up Python
       if: steps.skip_autofix.outputs.skip == 'no'
@@ -54,7 +54,7 @@ runs:
     - name: Commit and push changes
       id: commit_push
       if: steps.skip_autofix.outputs.skip == 'no'
-      uses: j-moralejo-pinas/ci-cd-python-gitflow/.github/actions/commit-push@main
+      uses: j-moralejo-pinas/ci-cd-python/.github/actions/commit-push@main
       with:
         pat: ${{ inputs.pat_token }}
         message: "style: apply autofix"
