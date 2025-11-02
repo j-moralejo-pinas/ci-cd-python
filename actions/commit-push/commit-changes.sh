@@ -8,53 +8,78 @@ set -euo pipefail
 BASE_MESSAGE="${1:-}"
 INPUT_LABELS="${2:-}"
 
+echo "=== DEBUG INFO: commit-changes.sh ==="
+echo "Base commit message: '${BASE_MESSAGE}'"
+echo "Input labels: '${INPUT_LABELS}'"
+echo "Current directory: $(pwd)"
+echo "Git version: $(git --version)"
+echo "Current branch: $(git rev-parse --abbrev-ref HEAD || echo 'detached')"
+echo "Current commit: $(git rev-parse --short HEAD)"
+echo "Repository status before committing:"
+git status --short || echo "(no git status output)"
+
+# Check if there are any changes to commit
 if git diff --quiet; then
-  echo "has_changes=false" >> "${GITHUB_OUTPUT}"
+  echo "No changes detected — skipping commit."
+  echo "has_changes=false" >> "${GITHUB_OUTPUT:-/dev/null}"
+  echo "=== END DEBUG INFO ==="
   exit 0
 fi
 
-# Git identity is expected to be configured by a prior step/action
+# Confirm that Git identity is configured
+echo "Configured git user:"
+git config user.name || echo "(no user.name set)"
+git config user.email || echo "(no user.email set)"
 
-# Extract labels from previous commit (current HEAD before this new commit)
+# Extract labels from previous commit (if any)
 prev_labels_file="$(mktemp)"
 if git log -1 --pretty=%B | grep -o -E '\[[^][]+\]' > "${prev_labels_file}" 2>/dev/null; then
-  :
+  echo "Previous labels found in last commit:"
+  cat "${prev_labels_file}"
 else
+  echo "No previous labels found."
   : > "${prev_labels_file}"
 fi
 
-# Build a combined label list: previous labels + input labels
+# Combine previous and new labels
 all_labels_file="$(mktemp)"
-# Add previous labels (strip brackets)
 while IFS= read -r token; do
   lbl="${token#[}"
   lbl="${lbl%]}"
-  if [[ -n "${lbl}" ]]; then
-    printf '%s\n' "${lbl}" >> "${all_labels_file}"
-  fi
+  [[ -n "${lbl}" ]] && printf '%s\n' "${lbl}" >> "${all_labels_file}"
 done < "${prev_labels_file}"
 
-# Add labels provided via inputs (comma and/or space separated)
 tmp=${INPUT_LABELS//,/ }
 for lbl in ${tmp}; do
-  if [[ -n "${lbl}" ]]; then
-    printf '%s\n' "${lbl}" >> "${all_labels_file}"
-  fi
+  [[ -n "${lbl}" ]] && printf '%s\n' "${lbl}" >> "${all_labels_file}"
 done
 
-# De-duplicate while preserving order of first occurrence
+# Deduplicate while preserving order
 mapfile -t uniq_labels < <(awk 'NF{ if (!seen[$0]++) print $0 }' "${all_labels_file}")
 
-# Build bracketed labels string
+# Build formatted label string
 formatted_labels=""
 for lbl in "${uniq_labels[@]}"; do
-  if [[ -n "${lbl}" ]]; then
-    formatted_labels+=" [${lbl}]"
-  fi
+  [[ -n "${lbl}" ]] && formatted_labels+=" [${lbl}]"
 done
 
 # Final commit message
 final_msg="${BASE_MESSAGE}${formatted_labels}"
+echo "Final commit message to use: '${final_msg}'"
 
-git commit -am "${final_msg}"
-echo "has_changes=true" >> "${GITHUB_OUTPUT}"
+# Show which files are about to be committed
+echo "Files that will be included in the commit:"
+git diff --name-only
+
+# Create commit
+echo "Creating commit..."
+set -x
+git add -A
+git commit -m "${final_msg}"
+set +x
+
+echo "✅ Commit created successfully."
+git log -1 --pretty=oneline
+
+echo "has_changes=true" >> "${GITHUB_OUTPUT:-/dev/null}"
+echo "=== END DEBUG INFO ==="
