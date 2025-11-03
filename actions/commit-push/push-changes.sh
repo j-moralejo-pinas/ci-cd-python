@@ -11,53 +11,77 @@ REPO="${2:-}"
 BRANCH="${3:-}"
 
 echo "=== DEBUG INFO: push-changes.sh ==="
-echo "Repo: ${REPO}"
-echo "Branch: ${BRANCH}"
-echo "Current directory: $(pwd)"
+echo "PWD: $(pwd)"
+echo "Repo argument: ${REPO}"
+echo "Branch argument: ${BRANCH}"
 echo "Git version: $(git --version)"
-echo "Current commit: $(git rev-parse --short HEAD)"
-echo "Remote before modification:"
-git remote -v || echo "No remotes found."
+echo "Current commit: $(git rev-parse --short HEAD 2>/dev/null || echo '(none)')"
+echo "HEAD ref: $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '(none)')"
+echo "Git dir: $(git rev-parse --git-dir 2>/dev/null || echo '(not a repo)')"
+echo "Work tree: $(git rev-parse --show-toplevel 2>/dev/null || echo '(none)')"
+echo
+
+echo "--- Remote configuration BEFORE modification ---"
+git remote -v || echo "(no remotes)"
+echo
+
+echo "--- Branch list ---"
+git branch -a || true
+echo
+
+echo "--- Origin URL (raw) ---"
+git config --get remote.origin.url || echo "(none)"
+echo
 
 if [[ -z "${PAT}" ]]; then
-  echo "PAT not provided, skipping push." >&2
+  echo "❌ PAT not provided — skipping push."
   echo "did_push=false" >> "${GITHUB_OUTPUT:-/dev/null}"
   exit 0
 fi
 
-# Unset default credentials to avoid conflicts
-echo "Clearing existing git credentials..."
+# Clear default credentials to avoid conflicts
+echo "--- Clearing default GitHub credentials ---"
 git config --unset-all http.https://github.com/.extraheader || true
 git config --unset credential.helper || true
+echo "Done."
+echo
 
-# Configure new remote
-echo "Setting new remote URL for origin..."
+# Set remote URL with token
+echo "--- Setting remote URL to use provided PAT ---"
 git remote set-url origin "https://${PAT}@github.com/${REPO}.git"
+git config --get remote.origin.url || echo "(remote not set)"
+echo
 
-echo "Remote after modification:"
-git remote -v
+# Confirm we are in a valid repo
+echo "--- Repo status before push ---"
+git status || echo "(status unavailable)"
+echo
 
-# Show what’s staged and untracked before pushing
-echo "Status before push:"
-git status
+echo "--- Last 2 commits ---"
+git log -2 --oneline || true
+echo
 
-# Show last commit message
-echo "Last commit message:"
-git log -1 --pretty=oneline
+echo "--- Testing remote connectivity ---"
+git ls-remote origin HEAD || echo "Remote not reachable"
+echo
 
-# Try to push
-echo "Attempting to push HEAD to ${BRANCH}..."
+# Attempt push
+echo "--- Pushing now ---"
 set -x
-git push origin "HEAD:${BRANCH}"
+git push origin "HEAD:${BRANCH}" || {
+  set +x
+  echo "❌ Push failed with exit code $?"
+  echo "Current user: $(git config user.name 2>/dev/null || echo '(unset)')"
+  echo "Current email: $(git config user.email 2>/dev/null || echo '(unset)')"
+  echo "Remote after push attempt:"
+  git remote -v || true
+  echo "Listing remotes in config file:"
+  git config --list | grep remote || true
+  echo "did_push=false" >> "${GITHUB_OUTPUT:-/dev/null}"
+  exit 1
+}
 set +x
 
-# Confirm the result
-if git ls-remote origin "${BRANCH}" &>/dev/null; then
-  echo "✅ Push successful!"
-  echo "did_push=true" >> "${GITHUB_OUTPUT:-/dev/null}"
-else
-  echo "❌ Push failed or branch not found remotely."
-  echo "did_push=false" >> "${GITHUB_OUTPUT:-/dev/null}"
-fi
-
+echo "✅ Push succeeded."
+echo "did_push=true" >> "${GITHUB_OUTPUT:-/dev/null}"
 echo "=== END DEBUG INFO ==="
