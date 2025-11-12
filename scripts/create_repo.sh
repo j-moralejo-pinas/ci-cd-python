@@ -27,7 +27,7 @@ echo "Creating GitHub repository '$REPO_NAME' from template '$TEMPLATE' ($VISIBI
 gh repo create "$REPO_NAME" \
     --template "$TEMPLATE" \
     --description "$DESCRIPTION" \
-    --"$VISIBILITY" \
+    --$VISIBILITY \
     --clone "$PROJECTS_DIR/$REPO_NAME"
 
 echo "Repository created and cloned to $PROJECTS_DIR/$REPO_NAME"

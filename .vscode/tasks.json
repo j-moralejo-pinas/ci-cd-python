@@ -1,0 +1,79 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Create new repo from template",
+      "type": "shell",
+      "command": "/bin/bash ${workspaceFolder}/scripts/create_repo.sh ${input:repoName} \"${input:repoDesc}\" ${input:repoVisibility}",
+      "problemMatcher": [],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "Create and configure repo from template",
+      "type": "shell",
+      "command": "/bin/bash ${workspaceFolder}/scripts/create_and_configure_repo.sh ${input:repoName} \"${input:repoDesc}\" ${input:pythonVersion} ${input:workflow} ${input:pythonVersionMax} ${input:repoTopics} ${input:repoVisibility}",
+      "problemMatcher": [],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "repoName",
+      "type": "promptString",
+      "description": "Enter the repository name"
+    },
+    {
+      "id": "repoDesc",
+      "type": "promptString",
+      "description": "Enter a short repository description"
+    },
+    {
+      "id": "repoVisibility",
+      "type": "pickString",
+      "description": "Select visibility",
+      "options": [
+        "public",
+        "private"
+      ],
+      "default": "private"
+    },
+    {
+      "id": "pythonVersion",
+      "type": "promptString",
+      "description": "Enter minimum Python version (e.g., 3.11)"
+    },
+    {
+      "id": "workflow",
+      "type": "pickString",
+      "description": "Select workflow type",
+      "options": [
+        "github-flow",
+        "gitflow",
+        "trunk"
+      ],
+      "default": "github-flow"
+    },
+    {
+      "id": "pythonVersionMax",
+      "type": "promptString",
+      "description": "Enter maximum Python version (optional, e.g., 3.12)",
+      "default": ""
+    },
+    {
+      "id": "repoTopics",
+      "type": "promptString",
+      "description": "Enter repository topics, comma-separated (optional)",
+      "default": ""
+    }
+  ]
+}
