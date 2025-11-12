@@ -16,7 +16,11 @@ concurrency:
 jobs:
   semver-tag:
     name: semver-tag
-    if: github.event.pull_request.merged == true && !startsWith(github.event.pull_request.head.ref, 'meta')
+    if: |
+      (github.event.pull_request.merged == true &&
+      !startsWith(github.event.pull_request.head.ref, 'meta') &&
+      github.event.pull_request.head.user.login != 'github-actions[bot]') ||
+      (github.event_name == 'push')
     runs-on: ubuntu-latest
     steps:
       - name: Run semver tag action

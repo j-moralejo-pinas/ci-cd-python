@@ -6,8 +6,8 @@ inputs:
     description: GitHub token for gh CLI
     required: true
   prs:
-    description: Space-separated list of PR numbers to include
-    required: true
+    description: Space-separated list of PR numbers to include (optional, uses last commit message if not provided)
+    required: false
   version:
     description: Tag for the new changelog entry (e.g., vX.Y.Z)
     required: true

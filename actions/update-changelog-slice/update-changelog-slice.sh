@@ -13,8 +13,12 @@ VERSION="${VERSION:-}"
 CHANGELOG_PATH="${CHANGELOG_PATH:-CHANGELOG.rst}"
 
 if [[ -z "${PRS// /}" ]]; then
-  echo "No PR numbers provided; creating changelog entry with version header only." >&2
-  CHANGELOG_WORDS=""
+  echo "No PR numbers provided; using last commit message." >&2
+  # Get last commit message and keep only '- <Word>:' lines
+  CHANGELOG_WORDS="$(git log -1 --pretty=%B | awk '/^- [[:alpha:]]+: /')"
+  
+  echo "Collected lines from commit message:"
+  printf '%s\n' "$CHANGELOG_WORDS"
 else
   # 1) Get PR bodies and keep only '- <Word>:' lines
   CHANGELOG_WORDS="$({
@@ -26,7 +30,7 @@ else
     | awk '/^- [[:alpha:]]+: /'
   })"
 
-  echo "Collected lines:"
+  echo "Collected lines from PR bodies:"
   printf '%s\n' "$CHANGELOG_WORDS"
 fi
 

@@ -126,16 +126,22 @@ runs:
         prev_cut: ${{ steps.previous_cut.outputs.prev_cut }}
         cur_cut: ${{ steps.current_cut.outputs.cur_cut }}
 
-    # Prepare PR list for changelog depending on branch type
+    # Prepare PR list for changelog depending on branch type and workflow
     - name: Prepare PR list for changelog
       id: prs_input
       if: ${{ steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
       shell: bash
       run: |
-        if [[ "${{ inputs.workflow_type }}" != "gitflow" ]] || [[ "${{ steps.meta.outputs.is_hotfix }}" == "true" ]]; then
-          echo "numbers=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+        # Only use PRs for gitflow and github-flow workflows
+        if [[ "${{ inputs.workflow_type }}" == "gitflow" ]] || [[ "${{ inputs.workflow_type }}" == "github-flow" ]]; then
+          if [[ "${{ inputs.workflow_type }}" == "gitflow" ]] && [[ "${{ steps.meta.outputs.is_hotfix }}" != "true" ]]; then
+            echo "numbers=${{ steps.prs.outputs.numbers }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "numbers=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          fi
         else
-          echo "numbers=${{ steps.prs.outputs.numbers }}" >> "$GITHUB_OUTPUT"
+          # For other workflows (e.g., trunk), don't pass PRs - use commit messages
+          echo "numbers=" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Build and prepend changelog slice
