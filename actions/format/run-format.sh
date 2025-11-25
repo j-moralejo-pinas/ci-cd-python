@@ -6,7 +6,8 @@ python -m pip install --upgrade pip
 pip install pdm
 
 # Install formatting dependencies
-pdm install --no-self --no-lock -G format
+pdm lock --group format
+pdm install --no-self -G format
 
 # Run pyupgrade across src; don't fail if files were changed
 if compgen -G "src/*.py" > /dev/null || find src -type f -name "*.py" | grep -q .; then

@@ -6,4 +6,5 @@ python -m pip install --upgrade pip
 pip install pdm
 
 # Install test dependencies (--no-lock allows installation without a lockfile)
-pdm install --no-self --no-lock -G test
+pdm lock --group test
+pdm install --no-self -G test

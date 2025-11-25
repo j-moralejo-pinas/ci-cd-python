@@ -15,7 +15,8 @@ python -m pip install --upgrade pip
 pip install pdm
 
 # Install code-quality dependencies
-pdm install --no-self --no-lock -G code-quality
+pdm lock --group code-quality
+pdm install --no-self -G code-quality
 
 # Run pydoclint, ruff, and pyright using the PDM environment
 pdm run pydoclint src/
