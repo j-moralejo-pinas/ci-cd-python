@@ -16,7 +16,7 @@
     {
       "label": "Create and configure repo from template",
       "type": "shell",
-      "command": "/bin/bash ${workspaceFolder}/scripts/create_and_configure_repo.sh ${input:repoName} \"${input:repoDesc}\" ${input:pythonVersion} ${input:workflow} ${input:pythonVersionMax} ${input:repoTopics} ${input:repoVisibility}",
+      "command": "/bin/bash ${workspaceFolder}/scripts/create_and_configure_repo.sh \"${input:repoName}\" \"${input:repoDesc}\" \"${input:pythonVersion}\" \"${input:workflow}\" \"${input:pythonVersionMax}\" \"${input:repoTopics}\" \"${input:repoVisibility}\"",
       "problemMatcher": [],
       "group": "none",
       "presentation": {

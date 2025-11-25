@@ -4,7 +4,7 @@
 set -e
 
 TEMPLATE="python-boilerplate"
-PROJECTS_DIR="$HOME/Projects"
+PROJECTS_DIR="$HOME/projects"
 
 REPO_NAME="$1"
 DESCRIPTION="$2"
@@ -27,8 +27,12 @@ echo "Creating GitHub repository '$REPO_NAME' from template '$TEMPLATE' ($VISIBI
 gh repo create "$REPO_NAME" \
     --template "$TEMPLATE" \
     --description "$DESCRIPTION" \
-    --$VISIBILITY \
-    --clone "$PROJECTS_DIR/$REPO_NAME"
+    --$VISIBILITY
+
+sleep 5
+
+echo "Cloning repository to $PROJECTS_DIR/$REPO_NAME..."
+gh repo clone "$REPO_NAME" "$PROJECTS_DIR/$REPO_NAME"
 
 echo "Repository created and cloned to $PROJECTS_DIR/$REPO_NAME"
 cd "$PROJECTS_DIR/$REPO_NAME"
