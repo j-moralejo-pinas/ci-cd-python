@@ -67,11 +67,3 @@ jobs:
     steps:
       - name: Run test action
         uses: j-moralejo-pinas/ci-cd-python/actions/test@main
-
-  tag-on-merge:
-    name: tag-on-merge
-    needs: [get-workflow-type, test]
-    if: needs.format.outputs.did_push != 'true'
-    uses: j-moralejo-pinas/ci-cd-python/.github/workflows/tag_on_merge.yml@main
-    secrets:
-      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}

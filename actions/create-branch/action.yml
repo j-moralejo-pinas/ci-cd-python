@@ -1,0 +1,27 @@
+name: Create Branch
+description: Creates a new branch in the repository
+
+inputs:
+  pat_token:
+    description: Personal access token for authentication
+    required: true
+  branch_name:
+    description: Name of the branch to create
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ inputs.pat_token }}
+        fetch-depth: 0
+
+    - name: Configure git
+      uses: j-moralejo-pinas/ci-cd-python/actions/git-config@main
+
+    - name: Create branch
+      shell: bash
+      run: |
+        bash ${{ github.action_path }}/create-branch.sh "${{ inputs.branch_name }}" "${{ inputs.pat_token }}"

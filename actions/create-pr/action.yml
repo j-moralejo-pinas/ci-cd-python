@@ -1,0 +1,29 @@
+name: Create Pull Request
+description: Creates a pull request from a branch to the base branch
+
+inputs:
+  pat_token:
+    description: Personal access token for authentication
+    required: true
+  gh_token:
+    description: GitHub token for API calls
+    required: true
+  branch_name:
+    description: Name of the branch to create PR from
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ inputs.pat_token }}
+        fetch-depth: 0
+
+    - name: Create pull request
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.gh_token }}
+      run: |
+        bash ${{ github.action_path }}/create-pr.sh "${{ inputs.branch_name }}"
