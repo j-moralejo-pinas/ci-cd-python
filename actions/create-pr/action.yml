@@ -24,6 +24,6 @@ runs:
     - name: Create pull request
       shell: bash
       env:
-        GH_TOKEN: ${{ inputs.gh_token }}
+        GH_TOKEN: ${{ inputs.pat_token }}
       run: |
         bash ${{ github.action_path }}/create-pr.sh "${{ inputs.branch_name }}"
