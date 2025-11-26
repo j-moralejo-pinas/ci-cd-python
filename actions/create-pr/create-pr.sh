@@ -3,7 +3,7 @@
 set -euo pipefail
 
 BRANCH_NAME="$1"
-BASE_BRANCH="${BASE_BRANCH:-dev}"
+BASE_BRANCH="${BASE_BRANCH:-main}"
 
 # Get the current branch info
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
