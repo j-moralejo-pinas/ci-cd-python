@@ -37,7 +37,7 @@ if [[ "$VISIBILITY" != "public" && "$VISIBILITY" != "private" ]]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECTS_DIR="$HOME/Projects"
+PROJECTS_DIR="$HOME/projects"
 
 echo "=========================================="
 echo "Full Repository Setup Script"
