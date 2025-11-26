@@ -41,11 +41,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-workflow-type, check-source-branch]
     if: needs.get-workflow-type.outputs.workflow_type == 'gitflow'
-    outputs:
-      branch_name: ${{ steps.create-branch.outputs.branch_name }}
     steps:
       - name: Run create-branch action
-        id: create-branch
         uses: j-moralejo-pinas/ci-cd-python/actions/create-branch@main
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
@@ -62,7 +59,7 @@ jobs:
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
           gh_token: ${{ github.token }}
-          branch_name: ${{ needs.create-release-branch.outputs.branch_name }}
+          branch_name: ${{ inputs.release_type == 'major' && 'major' || 'release' }}/${{ github.sha }}
 
   update-changelog:
     name: update-changelog
