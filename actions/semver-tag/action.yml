@@ -6,11 +6,15 @@ inputs:
     description: Personal Access Token with permission to push tags
     required: true
     default: ''
+  bump-type:
+    description: 'Optional: Directly specify the bump type (major, minor, patch, meta). If provided, skips branch type detection.'
+    required: false
+    default: ''
   major-branch-patterns:
     description: 'Comma-separated list of branch patterns for major version bumps (e.g., "major/,breaking/")'
     required: false
     default: 'major/'
-  hotfix-branch-patterns:
+  patch-branch-patterns:
     description: 'Comma-separated list of branch patterns for hotfix/patch version bumps (e.g., "hotfix/,patch/")'
     required: false
     default: 'fix/,hotfix/,bugfix/'
@@ -36,8 +40,9 @@ runs:
       id: find
       uses: j-moralejo-pinas/ci-cd-python/actions/find-next-semver@main
       with:
+        bump-type: ${{ inputs.bump-type }}
         major-branch-patterns: ${{ inputs.major-branch-patterns }}
-        hotfix-branch-patterns: ${{ inputs.hotfix-branch-patterns }}
+        patch-branch-patterns: ${{ inputs.patch-branch-patterns }}
 
     - name: Configure git user for tagging
       uses: j-moralejo-pinas/ci-cd-python/actions/git-config@main

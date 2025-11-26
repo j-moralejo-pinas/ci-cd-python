@@ -9,7 +9,7 @@ set -euo pipefail
 
 HEAD_BRANCH="${HEAD_BRANCH:-}"
 MAJOR_BRANCH_PATTERNS="${MAJOR_BRANCH_PATTERNS:-major/}"
-HOTFIX_BRANCH_PATTERNS="${HOTFIX_BRANCH_PATTERNS:-hotfix/}"
+PATCH_BRANCH_PATTERNS="${PATCH_BRANCH_PATTERNS:-hotfix/}"
 META_BRANCH_PATTERNS="${META_BRANCH_PATTERNS:-meta/}"
 
 # Function to check if branch matches any pattern
@@ -34,9 +34,9 @@ if matches_pattern "${HEAD_BRANCH}" "${META_BRANCH_PATTERNS}"; then
 elif matches_pattern "${HEAD_BRANCH}" "${MAJOR_BRANCH_PATTERNS}"; then
     BRANCH_TYPE="major"
     echo "Detected major branch: ${HEAD_BRANCH}"
-elif matches_pattern "${HEAD_BRANCH}" "${HOTFIX_BRANCH_PATTERNS}"; then
-    BRANCH_TYPE="hotfix"
-    echo "Detected hotfix branch: ${HEAD_BRANCH}"
+elif matches_pattern "${HEAD_BRANCH}" "${PATCH_BRANCH_PATTERNS}"; then
+    BRANCH_TYPE="patch"
+    echo "Detected patch branch: ${HEAD_BRANCH}"
 else
     BRANCH_TYPE="minor"
     echo "Detected minor branch: ${HEAD_BRANCH}"

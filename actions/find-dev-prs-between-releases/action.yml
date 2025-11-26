@@ -1,0 +1,43 @@
+name: Find Dev PRs Between Releases
+description: Find PR numbers on the dev branch between previous and current release cut points.
+
+inputs:
+  token:
+    description: GitHub token for gh CLI
+    required: true
+  repo:
+    description: owner/repo slug
+    required: true
+  dev_branch:
+    description: Name of the development branch
+    required: false
+    default: dev
+  main_branch:
+    description: Name of the main branch
+    required: false
+    default: main
+
+outputs:
+  numbers:
+    description: Space-separated PR numbers between releases
+    value: ${{ steps.run.outputs.numbers }}
+  prev_cut:
+    description: Previous release cut (fork point from dev to latest x.y.0 tag merge, or initial commit)
+    value: ${{ steps.run.outputs.prev_cut }}
+  cur_cut:
+    description: Current release cut (fork point from dev to HEAD)
+    value: ${{ steps.run.outputs.cur_cut }}
+
+runs:
+  using: composite
+  steps:
+    - name: Find PRs between release cuts
+      id: run
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        REPO_SLUG: ${{ inputs.repo }}
+        DEV_BRANCH: ${{ inputs.dev_branch }}
+        MAIN_BRANCH: ${{ inputs.main_branch }}
+      run: |
+        bash "${GITHUB_ACTION_PATH}/find-dev-prs-between-releases.sh"

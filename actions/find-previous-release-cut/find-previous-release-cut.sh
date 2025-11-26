@@ -19,7 +19,7 @@ else
   # Find merge into main that brought TAG in, if any
   MERGE=$(git rev-list --merges --ancestry-path "${TAG}".."origin/${MAIN_BRANCH}" | tail -n1 || true)
   [[ -z "${MERGE}" ]] && MERGE="${TAG}"
-  
+
   # If MERGE is a true merge, parent 2 is the release tip; else fall back to the tag itself
   PARENTS=$(git rev-list --parents -n1 "${MERGE}")
   if [[ "$(wc -w <<<"${PARENTS}")" -ge 3 ]]; then
@@ -27,7 +27,7 @@ else
   else
     REL_TIP="${TAG}"
   fi
-  
+
   PREV_CUT=$(git merge-base --fork-point "origin/${DEV_BRANCH}" "${REL_TIP}" || git merge-base "origin/${DEV_BRANCH}" "${REL_TIP}")
   echo "prev_cut=${PREV_CUT}" >> "${GITHUB_OUTPUT}"
   echo "Previous cut: ${PREV_CUT}"

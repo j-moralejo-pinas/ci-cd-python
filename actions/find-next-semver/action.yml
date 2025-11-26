@@ -2,11 +2,15 @@ name: Find Next Semver
 description: Determine latest semantic version tag and compute the next one based on PR context.
 
 inputs:
+  bump-type:
+    description: 'Optional: Directly specify the bump type (major, minor, patch, meta). If provided, skips branch type detection.'
+    required: false
+    default: ''
   major-branch-patterns:
     description: 'Comma-separated list of branch patterns for major version bumps (e.g., "major/,breaking/")'
     required: false
     default: 'major/'
-  hotfix-branch-patterns:
+  patch-branch-patterns:
     description: 'Comma-separated list of branch patterns for hotfix/patch version bumps (e.g., "hotfix/,patch/")'
     required: false
     default: 'hotfix/'
@@ -31,17 +35,18 @@ runs:
   steps:
     - name: Detect branch type
       id: branch-type
+      if: ${{ inputs.bump-type == '' }}
       uses: j-moralejo-pinas/ci-cd-python/actions/detect-branch-type@main
       with:
         head-branch: ${{ github.event.pull_request.head.ref || github.ref_name }}
         major-branch-patterns: ${{ inputs.major-branch-patterns }}
-        hotfix-branch-patterns: ${{ inputs.hotfix-branch-patterns }}
+        patch-branch-patterns: ${{ inputs.patch-branch-patterns }}
         meta-branch-patterns: ${{ inputs.meta-branch-patterns }}
 
     - name: Find latest and compute next semver
       id: run
       shell: bash
       env:
-        BRANCH_TYPE: ${{ steps.branch-type.outputs.branch-type }}
+        BRANCH_TYPE: ${{ inputs.bump-type != '' && inputs.bump-type || steps.branch-type.outputs.branch-type }}
       run: |
         bash "${GITHUB_ACTION_PATH}/find-next-semver.sh"

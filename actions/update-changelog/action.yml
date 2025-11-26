@@ -20,10 +20,10 @@ inputs:
     description: 'Comma-separated list of branch patterns for major version bumps (e.g., "major/,breaking/")'
     required: false
     default: 'major/'
-  hotfix-branch-patterns:
+  patch-branch-patterns:
     description: 'Comma-separated list of branch patterns for hotfix/patch version bumps (e.g., "hotfix/,patch/")'
     required: false
-    default: 'fix/,hotfix/,bugfix/'
+    default: 'hotfix/'
   meta-branch-patterns:
     description: 'Comma-separated list of branch patterns for non-version-bumping branches (e.g., "meta/,docs/")'
     required: false
@@ -52,7 +52,7 @@ runs:
       with:
         head-branch: ${{ github.head_ref || github.ref_name }}
         major-branch-patterns: ${{ inputs.major-branch-patterns }}
-        hotfix-branch-patterns: ${{ inputs.hotfix-branch-patterns }}
+        patch-branch-patterns: ${{ inputs.patch-branch-patterns }}
         meta-branch-patterns: ${{ inputs.meta-branch-patterns }}
 
     # Set convenience variables based on branch type
@@ -62,10 +62,10 @@ runs:
       env:
         BRANCH_TYPE: ${{ steps.branch-type.outputs.branch-type }}
       run: |
-        if [[ "$BRANCH_TYPE" == "hotfix" ]]; then
-          echo "is_hotfix=true" >> "$GITHUB_OUTPUT"
+        if [[ "$BRANCH_TYPE" == "patch" ]]; then
+          echo "is_patch=true" >> "$GITHUB_OUTPUT"
         else
-          echo "is_hotfix=false" >> "$GITHUB_OUTPUT"
+          echo "is_patch=false" >> "$GITHUB_OUTPUT"
         fi
         if [[ "$BRANCH_TYPE" == "meta" ]]; then
           echo "is_meta=true" >> "$GITHUB_OUTPUT"
@@ -80,7 +80,7 @@ runs:
       uses: j-moralejo-pinas/ci-cd-python/actions/find-next-semver@main
       with:
         major-branch-patterns: ${{ inputs.major-branch-patterns }}
-        hotfix-branch-patterns: ${{ inputs.hotfix-branch-patterns }}
+        patch-branch-patterns: ${{ inputs.patch-branch-patterns }}
         meta-branch-patterns: ${{ inputs.meta-branch-patterns }}
 
     # Detect last version present in CHANGELOG.rst (first header starting with '## vX.Y.Z - YYYY-MM-DD')
@@ -100,31 +100,25 @@ runs:
         new_tag: ${{ steps.semver.outputs.new_tag }}
         last_tag: ${{ steps.changelog_last.outputs.last_tag }}
 
-    - name: Find previous release cut
-      id: previous_cut
-      if: ${{ inputs.workflow_type == 'gitflow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python/actions/find-previous-release-cut@main
-      with:
-        dev_branch: dev
-        main_branch: main
-
-    - name: Find current release cut
-      id: current_cut
-      if: ${{ inputs.workflow_type == 'gitflow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python/actions/find-current-release-cut@main
-      with:
-        dev_branch: dev
-
-    - name: Find PRs on dev between cuts
-      id: prs
-      if: ${{ inputs.workflow_type == 'gitflow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' && steps.meta.outputs.is_hotfix != 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python/actions/find-prs-between-cuts@main
+    - name: Find PRs on dev between releases
+      id: prs_dev
+      if: ${{ inputs.workflow_type == 'gitflow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' && steps.meta.outputs.is_patch != 'true' }}
+      uses: j-moralejo-pinas/ci-cd-python/actions/find-dev-prs-between-releases@main
       with:
         token: ${{ inputs.gh_token }}
         repo: ${{ github.repository }}
         dev_branch: dev
-        prev_cut: ${{ steps.previous_cut.outputs.prev_cut }}
-        cur_cut: ${{ steps.current_cut.outputs.cur_cut }}
+        main_branch: main
+
+    - name: Find PRs on main between releases
+      id: prs_main
+      if: ${{ inputs.workflow_type == 'github-flow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' && steps.meta.outputs.is_patch != 'true' }}
+      uses: j-moralejo-pinas/ci-cd-python/actions/find-main-prs-between-releases@main
+      with:
+        token: ${{ inputs.gh_token }}
+        repo: ${{ github.repository }}
+        main_branch: main
+        patch-branch-patterns: ${{ inputs.patch-branch-patterns }}
 
     # Prepare PR list for changelog depending on branch type and workflow
     - name: Prepare PR list for changelog
@@ -132,10 +126,15 @@ runs:
       if: ${{ steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
       shell: bash
       run: |
-        # Only use PRs for gitflow and github-flow workflows
-        if [[ "${{ inputs.workflow_type }}" == "gitflow" ]] || [[ "${{ inputs.workflow_type }}" == "github-flow" ]]; then
-          if [[ "${{ inputs.workflow_type }}" == "gitflow" ]] && [[ "${{ steps.meta.outputs.is_hotfix }}" != "true" ]]; then
-            echo "numbers=${{ steps.prs.outputs.numbers }}" >> "$GITHUB_OUTPUT"
+        if [[ "${{ inputs.workflow_type }}" == "gitflow" ]]; then
+          if [[ "${{ steps.meta.outputs.is_patch }}" != "true" ]]; then
+            echo "numbers=${{ steps.prs_dev.outputs.numbers }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "numbers=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          fi
+        elif [[ "${{ inputs.workflow_type }}" == "github-flow" ]]; then
+          if [[ "${{ steps.meta.outputs.is_patch }}" != "true" ]]; then
+            echo "numbers=${{ steps.prs_main.outputs.numbers }}" >> "$GITHUB_OUTPUT"
           else
             echo "numbers=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
           fi

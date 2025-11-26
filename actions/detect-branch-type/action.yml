@@ -9,7 +9,7 @@ inputs:
     description: 'Comma-separated list of branch patterns for major version bumps (e.g., "major/,breaking/")'
     required: false
     default: 'major/'
-  hotfix-branch-patterns:
+  patch-branch-patterns:
     description: 'Comma-separated list of branch patterns for hotfix/patch version bumps (e.g., "hotfix/,patch/")'
     required: false
     default: 'hotfix/'
@@ -20,7 +20,7 @@ inputs:
 
 outputs:
   branch-type:
-    description: 'The detected branch type: "major", "hotfix", "minor", or "meta"'
+    description: 'The detected branch type: "major", "patch", "minor", or "meta"'
     value: ${{ steps.detect.outputs.branch_type }}
 
 runs:
@@ -32,7 +32,7 @@ runs:
       env:
         HEAD_BRANCH: ${{ inputs.head-branch }}
         MAJOR_BRANCH_PATTERNS: ${{ inputs.major-branch-patterns }}
-        HOTFIX_BRANCH_PATTERNS: ${{ inputs.hotfix-branch-patterns }}
+        PATCH_BRANCH_PATTERNS: ${{ inputs.patch-branch-patterns }}
         META_BRANCH_PATTERNS: ${{ inputs.meta-branch-patterns }}
       run: |
         bash "${GITHUB_ACTION_PATH}/detect-branch-type.sh"

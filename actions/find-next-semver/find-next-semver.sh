@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Environment variables:
-# - BRANCH_TYPE: The detected branch type ("major", "hotfix", or "minor")
+# - BRANCH_TYPE: The detected branch type ("major", "patch", or "minor")
 
 # 1) Fetch tags
 git fetch --tags --force --prune
@@ -27,8 +27,8 @@ if [[ "${BRANCH_TYPE}" == "meta" ]]; then
     REASON="meta branch - no version bump"
 elif [[ "${BRANCH_TYPE}" == "major" ]]; then
     X=$((X+1)); Y=0; Z=0; REASON="major branch bump"
-elif [[ "${BRANCH_TYPE}" == "hotfix" ]]; then
-    Z=$((Z+1)); REASON="hotfix patch bump"
+elif [[ "${BRANCH_TYPE}" == "patch" ]]; then
+    Z=$((Z+1)); REASON="patch bump"
 else
     Y=$((Y+1)); Z=0; REASON="regular release minor bump"
 fi

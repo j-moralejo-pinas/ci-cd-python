@@ -2,6 +2,12 @@ name: main_pr
 
 on:
   workflow_call:
+    inputs:
+      release_type:
+        description: 'Type of release: major, minor, or patch (default: minor)'
+        required: false
+        default: 'minor'
+        type: string
     secrets:
       PAT_TOKEN:
         required: true
@@ -40,7 +46,7 @@ jobs:
         uses: j-moralejo-pinas/ci-cd-python/actions/create-branch@main
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
-          branch_name: release/${{ github.sha }}
+          branch_name: ${{ inputs.release_type == 'major' && 'major' || 'release' }}/${{ github.sha }}
 
   create-release-pr:
     name: create-release-pr
@@ -53,7 +59,7 @@ jobs:
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
           gh_token: ${{ github.token }}
-          branch_name: release/${{ github.sha }}
+          branch_name: ${{ inputs.release_type == 'major' && 'major' || 'release' }}/${{ github.sha }}
 
   update-changelog:
     name: update-changelog
@@ -107,6 +113,11 @@ jobs:
     name: tag
     needs: [get-workflow-type, test]
     if: needs.get-workflow-type.outputs.workflow_type != 'gitflow'
-    uses: j-moralejo-pinas/ci-cd-python/.github/workflows/tag_on_merge.yml@main
-    secrets:
-      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run semver tag action
+        id: semver
+        uses: j-moralejo-pinas/ci-cd-python/actions/semver-tag@main
+        with:
+          pat_token: ${{ secrets.PAT_TOKEN }}
+          bump-type: ${{ inputs.release_type }}

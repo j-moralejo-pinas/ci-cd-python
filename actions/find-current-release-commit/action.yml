@@ -1,0 +1,27 @@
+name: Find Current Release Commit
+description: Determine the current/latest release commit on main branch.
+
+inputs:
+  main_branch:
+    description: Name of the main branch
+    required: false
+    default: main
+
+outputs:
+  cur_commit:
+    description: Current release commit (HEAD of main branch)
+    value: ${{ steps.run.outputs.cur_commit }}
+  cur_tag:
+    description: Latest version tag on main (if any)
+    value: ${{ steps.run.outputs.cur_tag }}
+
+runs:
+  using: composite
+  steps:
+    - name: Compute current release commit
+      id: run
+      shell: bash
+      env:
+        MAIN_BRANCH: ${{ inputs.main_branch }}
+      run: |
+        bash "${GITHUB_ACTION_PATH}/find-current-release-commit.sh"

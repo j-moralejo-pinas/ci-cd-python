@@ -39,7 +39,7 @@ jobs:
       did_push: ${{ steps.update-changelog.outputs.did_push || 'false' }}
     steps:
       - name: Update changelog
-        if: needs.get-workflow-type.outputs.workflow_type == 'gitflow'
+        if: needs.get-workflow-type.outputs.workflow_type == 'gitflow' || startsWith(github.head_ref, 'hotfix/')
         id: update-changelog
         uses: j-moralejo-pinas/ci-cd-python/actions/update-changelog@main
         with:

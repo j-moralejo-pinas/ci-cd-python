@@ -1,0 +1,27 @@
+name: Find Previous Release Commit
+description: Determine the previous release commit on main branch. Returns initial commit if no previous release exists.
+
+inputs:
+  main_branch:
+    description: Name of the main branch
+    required: false
+    default: main
+
+outputs:
+  prev_commit:
+    description: Previous release commit on main (commit of previous version tag, or initial commit)
+    value: ${{ steps.run.outputs.prev_commit }}
+  prev_tag:
+    description: Previous version tag (if any)
+    value: ${{ steps.run.outputs.prev_tag }}
+
+runs:
+  using: composite
+  steps:
+    - name: Compute previous release commit
+      id: run
+      shell: bash
+      env:
+        MAIN_BRANCH: ${{ inputs.main_branch }}
+      run: |
+        bash "${GITHUB_ACTION_PATH}/find-previous-release-commit.sh"
