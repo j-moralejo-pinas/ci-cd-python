@@ -24,4 +24,4 @@ runs:
     - name: Create branch
       shell: bash
       run: |
-        bash ${{ github.action_path }}/create-branch.sh "${{ inputs.branch_name }}" "${{ inputs.pat_token }}"
+        bash ${{ github.action_path }}/create-branch.sh "${{ inputs.branch_name }}" "${{ inputs.pat_token }}" "${{ github.repository }}"
