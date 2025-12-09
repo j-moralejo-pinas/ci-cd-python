@@ -21,6 +21,9 @@ runs:
         token: ${{ inputs.pat_token }}
         fetch-depth: 0
 
+    - name: Configure Git User
+      uses: j-moralejo-pinas/ci-cd-python/actions/git-config@main
+
     - name: Create pull request
       shell: bash
       env:
