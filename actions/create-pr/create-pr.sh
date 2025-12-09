@@ -8,6 +8,13 @@ BASE_BRANCH="${BASE_BRANCH:-main}"
 # Get the current branch info
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
+# Check if there are differences between the branches
+if git diff --quiet "origin/$BASE_BRANCH...$BRANCH_NAME"; then
+    echo "No differences found between $BRANCH_NAME and $BASE_BRANCH. Creating empty commit..."
+    git commit --allow-empty -m "chore: empty commit to trigger PR"
+    git push origin "$BRANCH_NAME"
+fi
+
 # Create a pull request using gh CLI
 gh pr create \
     --base "$BASE_BRANCH" \
