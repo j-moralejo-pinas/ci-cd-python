@@ -3,7 +3,7 @@ description: Slice changelog between releases and update CHANGELOG.rst
 
 inputs:
   workflow_type:
-    description: 'Type of workflow (gitflow or github-flow)'
+    description: 'Type of workflow (gitflow or github_flow)'
     required: false
     default: 'gitflow'
   gh_token:
@@ -112,7 +112,7 @@ runs:
 
     - name: Find PRs on main between releases
       id: prs_main
-      if: ${{ inputs.workflow_type == 'github-flow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' && steps.meta.outputs.is_patch != 'true' }}
+      if: ${{ inputs.workflow_type == 'github_flow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' && steps.meta.outputs.is_patch != 'true' }}
       uses: j-moralejo-pinas/ci-cd-python/actions/find-main-prs-between-releases@main
       with:
         token: ${{ inputs.gh_token }}
@@ -132,7 +132,7 @@ runs:
           else
             echo "numbers=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
           fi
-        elif [[ "${{ inputs.workflow_type }}" == "github-flow" ]]; then
+        elif [[ "${{ inputs.workflow_type }}" == "github_flow" ]]; then
           if [[ "${{ steps.meta.outputs.is_patch }}" != "true" ]]; then
             echo "numbers=${{ steps.prs_main.outputs.numbers }}" >> "$GITHUB_OUTPUT"
           else

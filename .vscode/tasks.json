@@ -57,11 +57,11 @@
       "type": "pickString",
       "description": "Select workflow type",
       "options": [
-        "github-flow",
+        "github_flow",
         "gitflow",
         "trunk"
       ],
-      "default": "github-flow"
+      "default": "github_flow"
     },
     {
       "id": "pythonVersionMax",
