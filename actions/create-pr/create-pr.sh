@@ -8,8 +8,15 @@ BASE_BRANCH="${BASE_BRANCH:-main}"
 # Get the current branch info
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-# Check if there are differences between the branches
-if git diff --quiet "origin/$BASE_BRANCH...$BRANCH_NAME"; then
+# Fetch latest refs from origin
+git fetch origin "$BASE_BRANCH"
+
+# Resolve refs to commit SHAs
+BASE_COMMIT=$(git rev-parse "origin/$BASE_BRANCH")
+HEAD_COMMIT=$(git rev-parse HEAD)
+
+# Check if there are differences between the commits
+if git diff --quiet "$BASE_COMMIT" "$HEAD_COMMIT"; then
     echo "No differences found between $BRANCH_NAME and $BASE_BRANCH. Creating empty commit..."
     git commit --allow-empty -m "chore: empty commit to trigger PR"
     git push origin "$BRANCH_NAME"
