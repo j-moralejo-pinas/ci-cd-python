@@ -29,7 +29,7 @@ jobs:
         uses: j-moralejo-pinas/ci-cd-python/actions/check-source-branch@main
         with:
           allowed_branches: ${{ needs.get-workflow-type.outputs.workflow_type == 'gitflow' && 'dev' || '' }}
-          allowed_prefixes: ${{ needs.get-workflow-type.outputs.workflow_type == 'gitflow' && 'hotfix/,release/,meta/,major/' || 'feature/,bugfix/,fix/,hotfix/,meta/,major/' }}
+          allowed_prefixes: ${{ needs.get-workflow-type.outputs.workflow_type == 'gitflow' && 'hotfix/,release/,meta/,major/' || 'feature/,bugfix/,fix/,hotfix/,release/,meta/,major/' }}
 
   update-changelog:
     name: update-changelog
