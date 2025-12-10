@@ -20,41 +20,10 @@ jobs:
         id: get-workflow
         uses: j-moralejo-pinas/ci-cd-python/actions/get-workflow-type@main
 
-  update-changelog:
-    name: update-changelog
-    runs-on: ubuntu-latest
-    needs: [get-workflow-type]
-    outputs:
-      did_push: ${{ steps.update-changelog.outputs.did_push || 'false' }}
-    steps:
-      - name: Update changelog
-        id: update-changelog
-        uses: j-moralejo-pinas/ci-cd-python/actions/update-changelog@main
-        with:
-          workflow_type: ${{ needs.get-workflow-type.outputs.workflow_type }}
-          pat_token: ${{ secrets.PAT_TOKEN }}
-          gh_token: ${{ github.token }}
-
-  format:
-    name: format
-    needs: [get-workflow-type, update-changelog]
-    if: needs.update-changelog.outputs.did_push != 'true'
-    runs-on: ubuntu-latest
-    outputs:
-      did_push: ${{ steps.format.outputs.did_push || 'false' }}
-    steps:
-      - name: Run format action
-        id: format
-        uses: j-moralejo-pinas/ci-cd-python/actions/format@main
-        with:
-          pat_token: ${{ secrets.PAT_TOKEN }}
-
   code-quality:
     name: code-quality
     runs-on: ubuntu-latest
-    needs: [get-workflow-type, format]
-    if: needs.format.outputs.did_push != 'true'
-    # No succeed needed
+    needs: [get-workflow-type]
     continue-on-error: true
     steps:
       - name: Run code quality action

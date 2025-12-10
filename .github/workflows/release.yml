@@ -68,6 +68,7 @@ jobs:
     if: needs.get-workflow-type.outputs.workflow_type == 'trunk'
     outputs:
       did_push: ${{ steps.update-changelog.outputs.did_push || 'false' }}
+      sha: ${{ steps.update-changelog.outputs.sha }}
     steps:
       - name: Update changelog
         id: update-changelog
@@ -77,25 +78,11 @@ jobs:
           pat_token: ${{ secrets.PAT_TOKEN }}
           gh_token: ${{ github.token }}
 
-  format:
-    name: format
-    needs: [get-workflow-type, update-changelog]
-    if: needs.get-workflow-type.outputs.workflow_type == 'trunk' && needs.update-changelog.outputs.did_push != 'true'
-    runs-on: ubuntu-latest
-    outputs:
-      did_push: ${{ steps.format.outputs.did_push || 'false' }}
-    steps:
-      - name: Run format action
-        id: format
-        uses: j-moralejo-pinas/ci-cd-python/actions/format@main
-        with:
-          pat_token: ${{ secrets.PAT_TOKEN }}
-
   code-quality:
     name: code-quality
     runs-on: ubuntu-latest
-    needs: [get-workflow-type, format]
-    if: needs.get-workflow-type.outputs.workflow_type == 'trunk' && needs.format.outputs.did_push != 'true'
+    needs: [get-workflow-type, update-changelog]
+    if: needs.get-workflow-type.outputs.workflow_type == 'trunk'
     steps:
       - name: Run code quality action
         uses: j-moralejo-pinas/ci-cd-python/actions/code-quality@main
@@ -111,7 +98,7 @@ jobs:
 
   tag:
     name: tag
-    needs: [get-workflow-type, test]
+    needs: [get-workflow-type, test, update-changelog]
     if: needs.get-workflow-type.outputs.workflow_type == 'trunk'
     runs-on: ubuntu-latest
     steps:
@@ -121,3 +108,4 @@ jobs:
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
           bump-type: ${{ inputs.release_type }}
+          commit-sha: ${{ needs.update-changelog.outputs.did_push == 'true' && needs.update-changelog.outputs.sha || github.sha }}

@@ -84,4 +84,5 @@ set +x
 
 echo "✅ Push succeeded."
 echo "did_push=true" >> "${GITHUB_OUTPUT:-/dev/null}"
+echo "sha=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT:-/dev/null}"
 echo "=== END DEBUG INFO ==="

@@ -21,6 +21,9 @@ outputs:
   did_push:
     description: Whether a push was performed
     value: ${{ steps.push.outputs.did_push || 'false' }}
+  sha:
+    description: The SHA of the commit that was pushed
+    value: ${{ steps.push.outputs.sha }}
 
 runs:
   using: composite
