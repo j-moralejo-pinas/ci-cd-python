@@ -13,11 +13,19 @@ VERSION="${VERSION:-}"
 CHANGELOG_PATH="${CHANGELOG_PATH:-CHANGELOG.rst}"
 
 if [[ -z "${PRS// /}" ]]; then
-  echo "No PR numbers provided; using last commit message." >&2
-  # Get last commit message and keep only '- <Word>:' lines
-  CHANGELOG_WORDS="$(git log -1 --pretty=%B | awk '/^- [[:alpha:]]+: /')"
+  echo "No PR numbers provided; using commit messages since last tag." >&2
   
-  echo "Collected lines from commit message:"
+  LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
+
+  if [[ -n "$LAST_TAG" ]]; then
+    echo "Found last tag: ${LAST_TAG}" >&2
+    CHANGELOG_WORDS="$(git log "${LAST_TAG}..HEAD" --pretty=%B | awk '/^- [[:alpha:]]+: /')"
+  else
+    echo "No previous tag found. Using full history." >&2
+    CHANGELOG_WORDS="$(git log --pretty=%B | awk '/^- [[:alpha:]]+: /')"
+  fi
+
+  echo "Collected lines from commit messages:"
   printf '%s\n' "$CHANGELOG_WORDS"
 else
   # 1) Get PR bodies and keep only '- <Word>:' lines
