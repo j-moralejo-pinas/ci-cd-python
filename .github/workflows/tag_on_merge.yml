@@ -14,14 +14,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  get-workflow-type:
+    runs-on: ubuntu-latest
+    outputs:
+      workflow_type: ${{ steps.get-workflow.outputs.workflow_type }}
+    steps:
+      - name: Get workflow type from pyproject.toml
+        id: get-workflow
+        uses: j-moralejo-pinas/ci-cd-python/actions/get-workflow-type@main
+
   semver-tag:
     name: semver-tag
+    needs: get-workflow-type
     if: |
-      github.event.pull_request.merged == true && (startsWith(github.event.pull_request.head.ref, 'hotfix/') || startsWith(github.event.pull_request.head.ref, 'release/') || startsWith(github.event.pull_request.head.ref, 'major/'))
+      github.event.pull_request.merged == true && (
+        startsWith(github.event.pull_request.head.ref, 'hotfix/') ||
+        startsWith(github.event.pull_request.head.ref, 'release/') ||
+        startsWith(github.event.pull_request.head.ref, 'major/')
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Run semver tag action
         id: semver
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
+          commit-sha: ${{ (startsWith(github.event.pull_request.head.ref, 'hotfix/') && needs.get-workflow-type.outputs.workflow_type != 'gitflow') && github.event.pull_request.head.sha || github.event.pull_request.merge_commit_sha }}
         uses: j-moralejo-pinas/ci-cd-python/actions/semver-tag@main
