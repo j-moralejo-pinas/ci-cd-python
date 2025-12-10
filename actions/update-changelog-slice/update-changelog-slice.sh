@@ -19,10 +19,10 @@ if [[ -z "${PRS// /}" ]]; then
 
   if [[ -n "$LAST_TAG" ]]; then
     echo "Found last tag: ${LAST_TAG}" >&2
-    CHANGELOG_WORDS="$(git log "${LAST_TAG}..HEAD" --pretty=%B | awk '/^- [[:alpha:]]+: /')"
+    CHANGELOG_WORDS="$(git log "${LAST_TAG}..HEAD" --first-parent --pretty=%B | awk '/^- [[:alpha:]]+: /')"
   else
     echo "No previous tag found. Using full history." >&2
-    CHANGELOG_WORDS="$(git log --pretty=%B | awk '/^- [[:alpha:]]+: /')"
+    CHANGELOG_WORDS="$(git log --first-parent --pretty=%B | awk '/^- [[:alpha:]]+: /')"
   fi
 
   echo "Collected lines from commit messages:"
