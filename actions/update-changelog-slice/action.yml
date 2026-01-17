@@ -27,4 +27,8 @@ runs:
         VERSION: ${{ inputs.version }}
         CHANGELOG_PATH: ${{ inputs.changelog_path }}
       run: |
-        bash "${GITHUB_ACTION_PATH}/update-changelog-slice.sh"
+        if [[ -z "${PRS// /}" ]]; then
+          bash "${GITHUB_ACTION_PATH}/update-changelog-slice-git-cliff.sh"
+        else
+          bash "${GITHUB_ACTION_PATH}/update-changelog-slice.sh"
+        fi
