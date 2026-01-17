@@ -33,7 +33,3 @@ sleep 5
 
 echo "Cloning repository to $PROJECTS_DIR/$REPO_NAME..."
 gh repo clone "$REPO_NAME" "$PROJECTS_DIR/$REPO_NAME"
-
-echo "Repository created and cloned to $PROJECTS_DIR/$REPO_NAME"
-cd "$PROJECTS_DIR/$REPO_NAME"
-code .

@@ -96,3 +96,6 @@ echo "✓ Repository setup completed successfully!"
 echo "=========================================="
 echo "Repository location: $REPO_PATH"
 echo ""
+
+# Open the repository in VS Code
+code .
