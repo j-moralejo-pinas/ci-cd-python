@@ -26,9 +26,9 @@ REPO_NAME="${1:?Error: Repository name is required}"
 DESCRIPTION="${2:?Error: Repository description is required}"
 PYTHON_VERSION="${3:?Error: Python version is required}"
 WORKFLOW="${4:?Error: Workflow is required}"
-PYTHON_VERSION_MAX="${5:-}"
-REPO_TOPICS="${6:-}"
-VISIBILITY="${7:-private}"
+VISIBILITY="${5:-private}"
+PYTHON_VERSION_MAX="${6:-}"
+REPO_TOPICS="${7:-}"
 
 # Normalize visibility
 if [[ "$VISIBILITY" != "public" && "$VISIBILITY" != "private" ]]; then
