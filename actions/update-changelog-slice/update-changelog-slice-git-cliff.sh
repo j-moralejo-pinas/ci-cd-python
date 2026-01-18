@@ -23,4 +23,4 @@ export GITHUB_TOKEN="${GH_TOKEN}"
 # --tag: sets the version for the unreleased changes
 # --prepend: prepends to the file
 echo "Running git-cliff to update ${CHANGELOG_PATH}..."
-git-cliff --tag "${VERSION}" -o "${CHANGELOG_PATH}"
+git-cliff --tag "${VERSION}" --prepend "${CHANGELOG_PATH}" -u
