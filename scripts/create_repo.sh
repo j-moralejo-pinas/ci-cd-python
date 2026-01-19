@@ -29,7 +29,15 @@ gh repo create "$REPO_NAME" \
     --description "$DESCRIPTION" \
     --$VISIBILITY
 
-sleep 5
+echo "Waiting for repository to be available..."
+for i in {1..10}; do
+    if gh repo view "$REPO_NAME" >/dev/null 2>&1; then
+        echo "Repository available."
+        break
+    fi
+    echo "Waiting for repository..."
+    sleep 2
+done
 
 echo "Cloning repository to $PROJECTS_DIR/$REPO_NAME..."
 gh repo clone "$REPO_NAME" "$PROJECTS_DIR/$REPO_NAME"
