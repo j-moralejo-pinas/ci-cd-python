@@ -7,10 +7,10 @@ set -euo pipefail
 CHANGELOG_PATH="${1:-CHANGELOG.rst}"
 
 if [[ -f "${CHANGELOG_PATH}" ]]; then
-  # Look for the first line starting with "v" followed by a version number (X, X.Y, or X.Y.Z)
-  LAST_TAG=$(awk '/^v[0-9]+(\.[0-9]+)?(\.[0-9]+)?([[:space:]]+.*)?$/{
-    # Extract the version number from the line (including the "v")
-    match($0, /v[0-9]+(\.[0-9]+)?(\.[0-9]+)?/)
+  # Look for the first line starting with optional "v" followed by a version number (X, X.Y, or X.Y.Z)
+  LAST_TAG=$(awk '/^v?[0-9]+(\.[0-9]+)?(\.[0-9]+)?([[:space:]]+.*)?$/{
+    # Extract the version number from the line (including the optional "v")
+    match($0, /v?[0-9]+(\.[0-9]+)?(\.[0-9]+)?/)
     if (RSTART > 0) {
       version = substr($0, RSTART, RLENGTH)
       print version
