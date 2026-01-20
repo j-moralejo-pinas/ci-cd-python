@@ -2,9 +2,20 @@
 
 set -euo pipefail
 
+# Arguments:
+# 1: BRANCH_NAME - name of the branch to create PR from
+# 2: PAT_TOKEN - Personal Access Token for git authentication
+# 3: GH_TOKEN - GitHub token for gh CLI (optional, uses GITHUB_TOKEN env var if not provided)
+
 BRANCH_NAME="$1"
 PAT_TOKEN="$2"
+GH_TOKEN="${3:-${GITHUB_TOKEN:-}}"
 BASE_BRANCH="${BASE_BRANCH:-main}"
+
+# Export GH_TOKEN for gh CLI if provided
+if [[ -n "${GH_TOKEN}" ]]; then
+  export GH_TOKEN
+fi
 
 # Fetch latest refs from origin
 git fetch origin "$BASE_BRANCH"

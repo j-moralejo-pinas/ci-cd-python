@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Required env vars:
-# - GH_TOKEN: token for GitHub CLI auth
-# - PRS: (Should be empty or ignored here, as this script is for when PRS is empty)
-# - VERSION: tag for the new changelog entry (e.g., vX.Y.Z)
-# - CHANGELOG_PATH: path to changelog (default CHANGELOG.rst)
+# Arguments:
+# 1: GH_TOKEN - token for GitHub CLI auth
+# 2: VERSION - tag for the new changelog entry (e.g., vX.Y.Z)
+# 3: CHANGELOG_PATH - path to changelog (default CHANGELOG.rst)
 
-GH_TOKEN="${GH_TOKEN:-}"
-VERSION="${VERSION:-}"
-CHANGELOG_PATH="${CHANGELOG_PATH:-CHANGELOG.rst}"
+GH_TOKEN="${1:-}"
+VERSION="${2:-}"
+CHANGELOG_PATH="${3:-CHANGELOG.rst}"
 
 if ! command -v git-cliff &> /dev/null; then
   echo "git-cliff not found. Installing..."
@@ -23,4 +22,4 @@ export GITHUB_TOKEN="${GH_TOKEN}"
 # --tag: sets the version for the unreleased changes
 # --prepend: prepends to the file
 echo "Running git-cliff to update ${CHANGELOG_PATH}..."
-git-cliff --tag "${VERSION}" --prepend "${CHANGELOG_PATH}" -u
+GITHUB_TOKEN="${GH_TOKEN}" git-cliff --tag "${VERSION}" --prepend "${CHANGELOG_PATH}" -u

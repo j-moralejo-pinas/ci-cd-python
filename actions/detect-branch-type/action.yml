@@ -29,10 +29,9 @@ runs:
     - name: Detect branch type
       id: detect
       shell: bash
-      env:
-        HEAD_BRANCH: ${{ inputs.head-branch }}
-        MAJOR_BRANCH_PATTERNS: ${{ inputs.major-branch-patterns }}
-        PATCH_BRANCH_PATTERNS: ${{ inputs.patch-branch-patterns }}
-        META_BRANCH_PATTERNS: ${{ inputs.meta-branch-patterns }}
       run: |
-        bash "${GITHUB_ACTION_PATH}/detect-branch-type.sh"
+        bash "${GITHUB_ACTION_PATH}/detect-branch-type.sh" \
+          "${{ inputs.head-branch }}" \
+          "${{ inputs.major-branch-patterns }}" \
+          "${{ inputs.patch-branch-patterns }}" \
+          "${{ inputs.meta-branch-patterns }}"

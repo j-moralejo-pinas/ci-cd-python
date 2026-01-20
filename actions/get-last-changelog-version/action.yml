@@ -18,8 +18,6 @@ runs:
     - name: Determine last CHANGELOG version
       id: extract
       shell: bash
-      env:
-        CHANGELOG_PATH: ${{ inputs.changelog_path }}
       run: |
         bash "${GITHUB_ACTION_PATH}/get-last-changelog-version.sh" \
-          "${CHANGELOG_PATH}"
+          "${{ inputs.changelog_path }}"

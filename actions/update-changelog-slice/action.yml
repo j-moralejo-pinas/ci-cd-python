@@ -5,9 +5,6 @@ inputs:
   token:
     description: GitHub token for gh CLI
     required: true
-  prs:
-    description: Space-separated list of PR numbers to include (optional, uses last commit message if not provided)
-    required: false
   version:
     description: Tag for the new changelog entry (e.g., vX.Y.Z)
     required: true
@@ -21,10 +18,8 @@ runs:
   steps:
     - name: Build and prepend changelog slice
       shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.token }}
-        PRS: ${{ inputs.prs }}
-        VERSION: ${{ inputs.version }}
-        CHANGELOG_PATH: ${{ inputs.changelog_path }}
       run: |
-        bash "${GITHUB_ACTION_PATH}/update-changelog-slice-git-cliff.sh"
+        bash "${GITHUB_ACTION_PATH}/update-changelog-slice-git-cliff.sh" \
+          "${{ inputs.token }}" \
+          "${{ inputs.version }}" \
+          "${{ inputs.changelog_path }}"

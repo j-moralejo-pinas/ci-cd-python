@@ -24,7 +24,5 @@ runs:
 
     - name: Install code-quality deps and run checks
       shell: bash
-      env:
-        STOP_ON_FAILURE: ${{ inputs.stop-on-failure }}
       run: |
-        bash "${GITHUB_ACTION_PATH}/run-code-quality.sh"
+        bash "${GITHUB_ACTION_PATH}/run-code-quality.sh" "${{ inputs.stop-on-failure }}"

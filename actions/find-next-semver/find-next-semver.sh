@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Inputs from environment
-BUMP_TYPE_INPUT="${BUMP_TYPE_INPUT:-}"
-DETECTED_BRANCH_TYPE="${DETECTED_BRANCH_TYPE:-}"
-PAT_TOKEN="${PAT_TOKEN:-}"
+# Arguments:
+# 1: BUMP_TYPE_INPUT - bump type (major, minor, patch, meta, auto, or empty)
+# 2: DETECTED_BRANCH_TYPE - detected branch type (from detect-branch-type action)
+# 3: PAT_TOKEN - optional PAT token for git-cliff
+
+BUMP_TYPE_INPUT="${1:-}"
+DETECTED_BRANCH_TYPE="${2:-}"
+PAT_TOKEN="${3:-}"
 
 # Location of helper scripts (fallback to current dir if var not set)
 SCRIPT_DIR="${GITHUB_ACTION_PATH:-$(cd $(dirname "$0") && pwd)}"

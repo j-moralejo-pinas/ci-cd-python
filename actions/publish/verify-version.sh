@@ -8,6 +8,10 @@ set -euo pipefail
 PKG="${1:-}"
 EXPECTED="${2:-}"
 
+# Set env vars for Python subprocess
+export PKG
+export EXPECTED
+
 # Prefer local venv created in previous step if present
 if [[ -x .venv_test/bin/python ]]; then
     PYBIN="./.venv_test/bin/python"

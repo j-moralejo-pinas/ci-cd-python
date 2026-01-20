@@ -50,9 +50,8 @@ runs:
     - name: Find latest and compute next semver
       id: run
       shell: bash
-      env:
-        BUMP_TYPE_INPUT: ${{ inputs.bump-type }}
-        DETECTED_BRANCH_TYPE: ${{ steps.branch-type.outputs.branch-type }}
-        PAT_TOKEN: ${{ inputs.pat_token }}
       run: |
-        bash "${GITHUB_ACTION_PATH}/find-next-semver.sh"
+        bash "${GITHUB_ACTION_PATH}/find-next-semver.sh" \
+          "${{ inputs.bump-type }}" \
+          "${{ steps.branch-type.outputs.branch-type }}" \
+          "${{ inputs.pat_token }}"

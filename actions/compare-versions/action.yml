@@ -21,10 +21,7 @@ runs:
     - name: Compare versions
       id: compare
       shell: bash
-      env:
-        NEW_TAG: ${{ inputs.new_tag }}
-        LAST_TAG: ${{ inputs.last_tag }}
       run: |
         bash "${GITHUB_ACTION_PATH}/compare-versions.sh" \
-          "${NEW_TAG}" \
-          "${LAST_TAG}"
+          "${{ inputs.new_tag }}" \
+          "${{ inputs.last_tag }}"

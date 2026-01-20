@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Read configuration
-STOP_ON_FAILURE="${STOP_ON_FAILURE:-true}"
+# Argument 1: stop-on-failure (true|false, default: true)
+STOP_ON_FAILURE="${1:-true}"
 
 # Set bash options based on stop-on-failure setting
 if [[ "${STOP_ON_FAILURE}" == "true" ]]; then

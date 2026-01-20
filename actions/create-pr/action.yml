@@ -11,6 +11,10 @@ inputs:
   branch_name:
     description: Name of the branch to create PR from
     required: true
+  base_branch:
+    description: Name of the base branch to create PR into
+    required: false
+    default: main
 
 runs:
   using: composite
@@ -27,6 +31,34 @@ runs:
     - name: Create pull request
       shell: bash
       env:
-        GH_TOKEN: ${{ inputs.pat_token }}
+        GH_TOKEN: ${{ inputs.gh_token }}
       run: |
-        bash ${{ github.action_path }}/create-pr.sh "${{ inputs.branch_name }}" "${{ inputs.pat_token }}"
+        set -euo pipefail
+
+        BASE_BRANCH="${{ inputs.base_branch }}"
+
+        # Fetch latest refs from origin
+        git fetch origin "$BASE_BRANCH"
+
+        # Resolve refs to commit SHAs
+        BASE_COMMIT=$(git rev-parse "origin/$BASE_BRANCH")
+        HEAD_COMMIT=$(git rev-parse HEAD)
+
+        # Check if there are differences between the commits
+        if git diff --quiet "$BASE_COMMIT" "$HEAD_COMMIT"; then
+            echo "No differences found between ${{ inputs.branch_name }} and $BASE_BRANCH. Creating empty commit..."
+            git commit --allow-empty -m "chore: empty commit to trigger PR"
+            git push "https://x-access-token:${{ inputs.pat_token }}@github.com/${GITHUB_REPOSITORY}.git" HEAD:"${{ inputs.branch_name }}"
+        fi
+
+        # Create a pull request using gh CLI
+        gh pr create \
+            --base "$BASE_BRANCH" \
+            --head "${{ inputs.branch_name }}" \
+            --title "Release: ${{ inputs.branch_name }}" \
+            --body "Automated release pull request from ${{ inputs.branch_name }} to $BASE_BRANCH"
+
+        # Enable auto-merge for the PR
+        gh pr merge "${{ inputs.branch_name }}" --auto --merge -d
+
+        echo "Pull request created from ${{ inputs.branch_name }} to $BASE_BRANCH with auto-merge enabled"

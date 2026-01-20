@@ -51,13 +51,10 @@ runs:
     # The build + TestPyPI verification flow is performed in the previous step
     - name: Verify installed version
       shell: bash
-      env:
-        PKG: ${{ env.IMPORT_NAME }}
-        EXPECTED: ${{ inputs.version }}
       run: |
         bash "${GITHUB_ACTION_PATH}/verify-version.sh" \
-          "${PKG}" \
-          "${EXPECTED}"
+          "${{ env.IMPORT_NAME }}" \
+          "${{ inputs.version }}"
 
     - name: Upload to PyPI
       if: ${{ success() && inputs.pypi_token != '' }}

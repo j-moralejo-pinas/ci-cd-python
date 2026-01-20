@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Environment variables:
-# - HEAD_BRANCH: The branch name to check (required)
-# - MAJOR_BRANCH_PATTERNS: Comma-separated patterns for major version bumps (default: "major/")
-# - HOTFIX_BRANCH_PATTERNS: Comma-separated patterns for hotfix/patch version bumps (default: "hotfix/")
-# - META_BRANCH_PATTERNS: Comma-separated patterns for non-version-bumping branches (default: "meta/")
+# Arguments:
+# 1: HEAD_BRANCH - The branch name to check (required)
+# 2: MAJOR_BRANCH_PATTERNS - Comma-separated patterns for major version bumps (default: "major/")
+# 3: PATCH_BRANCH_PATTERNS - Comma-separated patterns for hotfix/patch version bumps (default: "hotfix/")
+# 4: META_BRANCH_PATTERNS - Comma-separated patterns for non-version-bumping branches (default: "meta/")
 
-HEAD_BRANCH="${HEAD_BRANCH:-}"
-MAJOR_BRANCH_PATTERNS="${MAJOR_BRANCH_PATTERNS:-major/}"
-PATCH_BRANCH_PATTERNS="${PATCH_BRANCH_PATTERNS:-hotfix/}"
-META_BRANCH_PATTERNS="${META_BRANCH_PATTERNS:-meta/}"
+HEAD_BRANCH="${1:-}"
+MAJOR_BRANCH_PATTERNS="${2:-major/}"
+PATCH_BRANCH_PATTERNS="${3:-hotfix/}"
+META_BRANCH_PATTERNS="${4:-meta/}"
 
 # Function to check if branch matches any pattern
 matches_pattern() {

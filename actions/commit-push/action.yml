@@ -43,10 +43,8 @@ runs:
       id: push
       if: steps.commit.outputs.has_changes == 'true' && inputs.pat != ''
       shell: bash
-      env:
-        PAT: ${{ inputs.pat }}
       run: |
         bash "${GITHUB_ACTION_PATH}/push-changes.sh" \
-          "${PAT}" \
+          "${{ inputs.pat }}" \
           "${{ github.repository }}" \
           "${{ github.head_ref || github.ref_name }}"

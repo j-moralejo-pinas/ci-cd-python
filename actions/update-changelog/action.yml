@@ -62,9 +62,8 @@ runs:
     - name: Set branch flags
       id: meta
       shell: bash
-      env:
-        BRANCH_TYPE: ${{ steps.branch-type.outputs.branch-type }}
       run: |
+        BRANCH_TYPE="${{ steps.branch-type.outputs.branch-type }}"
         if [[ "$BRANCH_TYPE" == "patch" ]]; then
           echo "is_patch=true" >> "$GITHUB_OUTPUT"
         else
@@ -104,55 +103,11 @@ runs:
         new_tag: ${{ steps.semver.outputs.new_tag }}
         last_tag: ${{ steps.changelog_last.outputs.last_tag }}
 
-    - name: Find PRs on dev between releases
-      id: prs_dev
-      if: ${{ inputs.workflow_type == 'gitflow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' && steps.meta.outputs.is_patch != 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python/actions/find-dev-prs-between-releases@main
-      with:
-        token: ${{ inputs.gh_token }}
-        repo: ${{ github.repository }}
-        dev_branch: dev
-        main_branch: main
-
-    - name: Find PRs on main between releases
-      id: prs_main
-      if: ${{ inputs.workflow_type == 'github_flow' && steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' && steps.meta.outputs.is_patch != 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python/actions/find-main-prs-between-releases@main
-      with:
-        token: ${{ inputs.gh_token }}
-        repo: ${{ github.repository }}
-        main_branch: main
-        patch-branch-patterns: ${{ inputs.patch-branch-patterns }}
-
-    # Prepare PR list for changelog depending on branch type and workflow
-    - name: Prepare PR list for changelog
-      id: prs_input
-      if: ${{ steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
-      shell: bash
-      run: |
-        if [[ "${{ inputs.workflow_type }}" == "gitflow" ]]; then
-          if [[ "${{ steps.meta.outputs.is_patch }}" != "true" ]]; then
-            echo "numbers=${{ steps.prs_dev.outputs.numbers }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "numbers=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
-          fi
-        elif [[ "${{ inputs.workflow_type }}" == "github_flow" ]]; then
-          if [[ "${{ steps.meta.outputs.is_patch }}" != "true" ]]; then
-            echo "numbers=${{ steps.prs_main.outputs.numbers }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "numbers=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
-          fi
-        else
-          # For other workflows (e.g., trunk), don't pass PRs - use commit messages
-          echo "numbers=" >> "$GITHUB_OUTPUT"
-        fi
-
     - name: Build and prepend changelog slice
       if: ${{ steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
       uses: j-moralejo-pinas/ci-cd-python/actions/update-changelog-slice@main
       with:
         token: ${{ inputs.gh_token }}
-        prs: ${{ steps.prs_input.outputs.numbers }}
         version: ${{ steps.semver.outputs.new_tag }}
         changelog_path: ${{ inputs.changelog_path }}
 
