@@ -12,9 +12,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check-up-to-date:
+    name: check-up-to-date
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify branch is up to date
+        uses: j-moralejo-pinas/ci-cd-python/actions/check-up-to-date@main
+        with:
+          target_branch: "dev"
+          ignore_patterns: "hotfix/*,main"
+
   format:
     name: format
     runs-on: ubuntu-latest
+    needs: check-up-to-date
     outputs:
       did_push: ${{ steps.format.outputs.did_push || 'false' }}
     steps:
