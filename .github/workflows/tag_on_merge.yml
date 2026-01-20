@@ -59,6 +59,5 @@ jobs:
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
           commit-sha: ${{ (startsWith(github.event.pull_request.head.ref, 'hotfix/') && needs.get-workflow-type.outputs.workflow_type != 'gitflow') && github.event.pull_request.head.sha || github.event.pull_request.merge_commit_sha }}
-          new_version: ${{ needs.calculate-version.outputs.new_version }}
           new_tag: ${{ needs.calculate-version.outputs.new_tag }}
         uses: j-moralejo-pinas/ci-cd-python/actions/semver-tag@main

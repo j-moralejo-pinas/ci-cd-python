@@ -123,6 +123,5 @@ jobs:
         uses: j-moralejo-pinas/ci-cd-python/actions/semver-tag@main
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
-          bump-type: ${{ inputs.release_type }}
           commit-sha: ${{ needs.update-changelog.outputs.did_push == 'true' && needs.update-changelog.outputs.sha || github.sha }}
           new_tag: ${{ needs.calculate-version.outputs.new_tag }}

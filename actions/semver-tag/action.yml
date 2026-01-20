@@ -6,36 +6,12 @@ inputs:
     description: Personal Access Token with permission to push tags
     required: true
     default: ''
-  bump-type:
-    description: 'Optional: Directly specify the bump type (major, minor, patch, meta). If provided, skips branch type detection.'
-    required: false
-    default: ''
-  major-branch-patterns:
-    description: 'Comma-separated list of branch patterns for major version bumps (e.g., "major/,breaking/")'
-    required: false
-    default: 'major/'
-  patch-branch-patterns:
-    description: 'Comma-separated list of branch patterns for hotfix/patch version bumps (e.g., "hotfix/,patch/")'
-    required: false
-    default: 'fix/,hotfix/,bugfix/'
   commit-sha:
     description: 'Specific commit SHA to tag.'
-    required: true
-  new_version:
-    description: 'Pre-calculated new version (e.g., X.Y.Z)'
     required: true
   new_tag:
     description: 'Pre-calculated new tag (e.g., vX.Y.Z)'
     required: true
-
-
-outputs:
-  new_tag:
-    description: New tag in the format vX.Y.Z
-    value: ${{ inputs.new_tag }}
-  version:
-    description: Version without leading v (X.Y.Z)
-    value: ${{ inputs.new_version }}
 
 runs:
   using: composite
