@@ -18,6 +18,10 @@ inputs:
     description: 'Comma-separated list of branch patterns for non-version-bumping branches (e.g., "meta/,docs/")'
     required: false
     default: 'meta/'
+  pat_token:
+    description: 'GitHub Personal Access Token, required if bump-type is auto'
+    required: false
+    default: ''
 
 outputs:
   latest:
@@ -35,7 +39,7 @@ runs:
   steps:
     - name: Detect branch type
       id: branch-type
-      if: ${{ inputs.bump-type == '' }}
+      if: ${{ inputs.bump-type == '' || inputs.bump-type == 'auto' }}
       uses: j-moralejo-pinas/ci-cd-python/actions/detect-branch-type@main
       with:
         head-branch: ${{ github.event.pull_request.head.ref || github.ref_name }}
@@ -47,6 +51,8 @@ runs:
       id: run
       shell: bash
       env:
-        BRANCH_TYPE: ${{ inputs.bump-type != '' && inputs.bump-type || steps.branch-type.outputs.branch-type }}
+        BUMP_TYPE_INPUT: ${{ inputs.bump-type }}
+        DETECTED_BRANCH_TYPE: ${{ steps.branch-type.outputs.branch-type }}
+        PAT_TOKEN: ${{ inputs.pat_token }}
       run: |
         bash "${GITHUB_ACTION_PATH}/find-next-semver.sh"

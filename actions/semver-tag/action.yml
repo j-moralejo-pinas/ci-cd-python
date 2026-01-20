@@ -44,6 +44,7 @@ runs:
       uses: j-moralejo-pinas/ci-cd-python/actions/find-next-semver@main
       with:
         bump-type: ${{ inputs.bump-type }}
+        pat_token: ${{ inputs.pat_token }}
         major-branch-patterns: ${{ inputs.major-branch-patterns }}
         patch-branch-patterns: ${{ inputs.patch-branch-patterns }}
 
