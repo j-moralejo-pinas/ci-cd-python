@@ -14,7 +14,7 @@ BASE_BRANCH="${BASE_BRANCH:-main}"
 
 # Export GH_TOKEN for gh CLI if provided
 if [[ -n "${GH_TOKEN}" ]]; then
-  export GH_TOKEN
+    export GH_TOKEN
 fi
 
 # Fetch latest refs from origin

@@ -16,6 +16,12 @@ inputs:
     description: 'Path to the changelog file'
     required: false
     default: 'CHANGELOG.rst'
+  new_version:
+    description: 'Pre-calculated new version (e.g., X.Y.Z)'
+    required: true
+  new_tag:
+    description: 'Pre-calculated new tag (e.g., vX.Y.Z)'
+    required: true
   major-branch-patterns:
     description: 'Comma-separated list of branch patterns for major version bumps (e.g., "major/,breaking/")'
     required: false
@@ -64,27 +70,11 @@ runs:
       shell: bash
       run: |
         BRANCH_TYPE="${{ steps.branch-type.outputs.branch-type }}"
-        if [[ "$BRANCH_TYPE" == "patch" ]]; then
-          echo "is_patch=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "is_patch=false" >> "$GITHUB_OUTPUT"
-        fi
         if [[ "$BRANCH_TYPE" == "meta" ]]; then
           echo "is_meta=true" >> "$GITHUB_OUTPUT"
         else
           echo "is_meta=false" >> "$GITHUB_OUTPUT"
         fi
-
-    # Compute the new version as the first step
-    - name: Compute new version
-      id: semver
-      if: ${{ steps.meta.outputs.is_meta != 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python/actions/find-next-semver@main
-      with:
-        pat_token: ${{ inputs.pat_token }}
-        major-branch-patterns: ${{ inputs.major-branch-patterns }}
-        patch-branch-patterns: ${{ inputs.patch-branch-patterns }}
-        meta-branch-patterns: ${{ inputs.meta-branch-patterns }}
 
     # Detect last version present in CHANGELOG.rst (first header starting with '## vX.Y.Z - YYYY-MM-DD')
     - name: Determine last CHANGELOG version
@@ -100,7 +90,7 @@ runs:
       if: ${{ steps.meta.outputs.is_meta != 'true' }}
       uses: j-moralejo-pinas/ci-cd-python/actions/compare-versions@main
       with:
-        new_tag: ${{ steps.semver.outputs.new_tag }}
+        new_tag: ${{ inputs.new_tag }}
         last_tag: ${{ steps.changelog_last.outputs.last_tag }}
 
     - name: Build and prepend changelog slice
@@ -108,7 +98,7 @@ runs:
       uses: j-moralejo-pinas/ci-cd-python/actions/update-changelog-slice@main
       with:
         token: ${{ inputs.gh_token }}
-        version: ${{ steps.semver.outputs.new_tag }}
+        version: ${{ inputs.new_tag }}
         changelog_path: ${{ inputs.changelog_path }}
 
     - name: Commit and push changelog
@@ -116,6 +106,6 @@ runs:
       uses: j-moralejo-pinas/ci-cd-python/actions/commit-push@main
       with:
         pat: ${{ inputs.pat_token }}
-        message: "chore: update changelog for ${{ steps.semver.outputs.new_tag }}"
+        message: "chore: update changelog for ${{ inputs.new_tag }}"
         labels: changelog
       if: ${{ steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}

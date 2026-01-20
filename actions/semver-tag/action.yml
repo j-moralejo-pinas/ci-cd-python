@@ -21,15 +21,21 @@ inputs:
   commit-sha:
     description: 'Specific commit SHA to tag.'
     required: true
+  new_version:
+    description: 'Pre-calculated new version (e.g., X.Y.Z)'
+    required: true
+  new_tag:
+    description: 'Pre-calculated new tag (e.g., vX.Y.Z)'
+    required: true
 
 
 outputs:
   new_tag:
     description: New tag in the format vX.Y.Z
-    value: ${{ steps.find.outputs.new_tag }}
+    value: ${{ inputs.new_tag }}
   version:
     description: Version without leading v (X.Y.Z)
-    value: ${{ steps.find.outputs.version }}
+    value: ${{ inputs.new_version }}
 
 runs:
   using: composite
@@ -39,15 +45,6 @@ runs:
       with:
         fetch-depth: 0
 
-    - name: Find latest and next semver
-      id: find
-      uses: j-moralejo-pinas/ci-cd-python/actions/find-next-semver@main
-      with:
-        bump-type: ${{ inputs.bump-type }}
-        pat_token: ${{ inputs.pat_token }}
-        major-branch-patterns: ${{ inputs.major-branch-patterns }}
-        patch-branch-patterns: ${{ inputs.patch-branch-patterns }}
-
     - name: Configure git user for tagging
       uses: j-moralejo-pinas/ci-cd-python/actions/git-config@main
 
@@ -55,7 +52,7 @@ runs:
       shell: bash
       run: |
         bash "${GITHUB_ACTION_PATH}/tag-merge-commit.sh" \
-          "${{ steps.find.outputs.new_tag }}" \
+          "${{ inputs.new_tag }}" \
           "${{ github.event.pull_request.base.ref }}" \
           "${{ inputs.commit-sha }}" \
           "${{ inputs.pat_token }}" \
