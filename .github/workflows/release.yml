@@ -93,7 +93,6 @@ jobs:
           workflow_type: ${{ needs.get-workflow-type.outputs.workflow_type }}
           pat_token: ${{ secrets.PAT_TOKEN }}
           gh_token: ${{ github.token }}
-          new_version: ${{ needs.calculate-version.outputs.new_version }}
           new_tag: ${{ needs.calculate-version.outputs.new_tag }}
 
   code-quality:
@@ -126,5 +125,4 @@ jobs:
           pat_token: ${{ secrets.PAT_TOKEN }}
           bump-type: ${{ inputs.release_type }}
           commit-sha: ${{ needs.update-changelog.outputs.did_push == 'true' && needs.update-changelog.outputs.sha || github.sha }}
-          new_version: ${{ needs.calculate-version.outputs.new_version }}
           new_tag: ${{ needs.calculate-version.outputs.new_tag }}

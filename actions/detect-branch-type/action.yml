@@ -20,7 +20,7 @@ inputs:
 
 outputs:
   branch-type:
-    description: 'The detected branch type: "major", "patch", "minor", or "meta"'
+    description: 'The detected branch type: "major", "patch", "none", or "meta"'
     value: ${{ steps.detect.outputs.branch_type }}
 
 runs:

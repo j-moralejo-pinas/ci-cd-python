@@ -16,24 +16,9 @@ inputs:
     description: 'Path to the changelog file'
     required: false
     default: 'CHANGELOG.rst'
-  new_version:
-    description: 'Pre-calculated new version (e.g., X.Y.Z)'
-    required: true
   new_tag:
     description: 'Pre-calculated new tag (e.g., vX.Y.Z)'
     required: true
-  major-branch-patterns:
-    description: 'Comma-separated list of branch patterns for major version bumps (e.g., "major/,breaking/")'
-    required: false
-    default: 'major/'
-  patch-branch-patterns:
-    description: 'Comma-separated list of branch patterns for hotfix/patch version bumps (e.g., "hotfix/,patch/")'
-    required: false
-    default: 'hotfix/'
-  meta-branch-patterns:
-    description: 'Comma-separated list of branch patterns for non-version-bumping branches (e.g., "meta/,docs/")'
-    required: false
-    default: 'meta/'
 
 outputs:
   did_push:
@@ -54,32 +39,9 @@ runs:
         fetch-depth: 0
         fetch-tags: true
 
-    # Detect branch type using the detect-branch-type action
-    - name: Detect branch type
-      id: branch-type
-      uses: j-moralejo-pinas/ci-cd-python/actions/detect-branch-type@main
-      with:
-        head-branch: ${{ github.head_ref || github.ref_name }}
-        major-branch-patterns: ${{ inputs.major-branch-patterns }}
-        patch-branch-patterns: ${{ inputs.patch-branch-patterns }}
-        meta-branch-patterns: ${{ inputs.meta-branch-patterns }}
-
-    # Set convenience variables based on branch type
-    - name: Set branch flags
-      id: meta
-      shell: bash
-      run: |
-        BRANCH_TYPE="${{ steps.branch-type.outputs.branch-type }}"
-        if [[ "$BRANCH_TYPE" == "meta" ]]; then
-          echo "is_meta=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "is_meta=false" >> "$GITHUB_OUTPUT"
-        fi
-
     # Detect last version present in CHANGELOG.rst (first header starting with '## vX.Y.Z - YYYY-MM-DD')
     - name: Determine last CHANGELOG version
       id: changelog_last
-      if: ${{ steps.meta.outputs.is_meta != 'true' }}
       uses: j-moralejo-pinas/ci-cd-python/actions/get-last-changelog-version@main
       with:
         changelog_path: ${{ inputs.changelog_path }}
@@ -87,14 +49,13 @@ runs:
     # Compare versions (semantic): result only if new_tag > last_tag
     - name: Check if new version is above last changelog version
       id: should_run
-      if: ${{ steps.meta.outputs.is_meta != 'true' }}
       uses: j-moralejo-pinas/ci-cd-python/actions/compare-versions@main
       with:
         new_tag: ${{ inputs.new_tag }}
         last_tag: ${{ steps.changelog_last.outputs.last_tag }}
 
     - name: Build and prepend changelog slice
-      if: ${{ steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
+      if: ${{ steps.should_run.outputs.result == 'true' }}
       uses: j-moralejo-pinas/ci-cd-python/actions/update-changelog-slice@main
       with:
         token: ${{ inputs.gh_token }}
@@ -108,4 +69,4 @@ runs:
         pat: ${{ inputs.pat_token }}
         message: "chore: update changelog for ${{ inputs.new_tag }}"
         labels: changelog
-      if: ${{ steps.meta.outputs.is_meta != 'true' && steps.should_run.outputs.result == 'true' }}
+      if: ${{ steps.should_run.outputs.result == 'true' }}

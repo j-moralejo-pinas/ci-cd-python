@@ -57,5 +57,3 @@ runs:
           "${{ inputs.commit-sha }}" \
           "${{ inputs.pat_token }}" \
           "${{ github.repository }}"
-
-    # Version output is provided by the find-next-semver action

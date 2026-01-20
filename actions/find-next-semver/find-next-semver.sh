@@ -13,6 +13,7 @@ PAT_TOKEN="${3:-}"
 # Location of helper scripts (fallback to current dir if var not set)
 SCRIPT_DIR="${GITHUB_ACTION_PATH:-$(cd $(dirname "$0") && pwd)}"
 
+echo "Bump type input: '${BUMP_TYPE_INPUT}'"
 # 1) Get Latest Version
 LATEST="$("${SCRIPT_DIR}/get-latest-semver.sh")"
 echo "latest=${LATEST}" >> "${GITHUB_OUTPUT}"
@@ -33,7 +34,6 @@ elif [[ "$BUMP_TYPE_INPUT" == "auto" ]]; then
         USE_GIT_CLIFF=true
     fi
 else
-    # Empty bump type input -> use detected (legacy manual behavior)
     BRANCH_TYPE="${DETECTED_BRANCH_TYPE:-minor}"
 fi
 
@@ -54,18 +54,18 @@ if [[ "$USE_GIT_CLIFF" == "true" ]]; then
 
     echo "Running git-cliff --bumped-version..."
     OUTPUT=$(git-cliff --bumped-version 2>&1 || true)
-    
+
     echo "git-cliff output:"
     echo "$OUTPUT"
 
     # Extract version: Look for lines that match version format
     NEW_TAG_RAW=$(echo "$OUTPUT" | grep -oE "v?[0-9]+\.[0-9]+\.[0-9]+" | tail -n1)
-    
+
     if [[ -z "$NEW_TAG_RAW" ]]; then
-         echo "Error: Could not determine next version with git-cliff."
-         exit 1
+        echo "Error: Could not determine next version with git-cliff."
+        exit 1
     fi
-    
+
     if [[ "$NEW_TAG_RAW" != v* ]]; then
         NEW_TAG="v$NEW_TAG_RAW"
     else
@@ -76,10 +76,10 @@ if [[ "$USE_GIT_CLIFF" == "true" ]]; then
 
 else
     echo "Manual specific bump: ${BRANCH_TYPE}"
-    
+
     # Use helper script to calculate
     NEW_TAG="$("${SCRIPT_DIR}/calculate-bumped-version.sh" "${LATEST}" "${BRANCH_TYPE}")"
-    
+
     echo "Calculated new tag (manual): $NEW_TAG"
 fi
 

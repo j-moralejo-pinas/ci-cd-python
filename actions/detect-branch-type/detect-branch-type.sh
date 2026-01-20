@@ -39,7 +39,7 @@ elif matches_pattern "${HEAD_BRANCH}" "${PATCH_BRANCH_PATTERNS}"; then
     echo "Detected patch branch: ${HEAD_BRANCH}"
 else
     BRANCH_TYPE="minor"
-    echo "Detected minor branch: ${HEAD_BRANCH}"
+    echo "Detected minor type branch: ${HEAD_BRANCH}"
 fi
 
 echo "branch_type=${BRANCH_TYPE}" >> "${GITHUB_OUTPUT}"
