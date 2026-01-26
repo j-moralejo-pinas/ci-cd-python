@@ -87,9 +87,9 @@ fi
 # Run the configuration script
 bash scripts/init/local-configure-repo.sh \
     "$PYTHON_VERSION" \
+    "$WORKFLOW" \
     "$PYTHON_VERSION_MAX" \
-    "$REPO_TOPICS" \
-    "$WORKFLOW"
+    "$REPO_TOPICS"
 
 echo ""
 echo "=========================================="
