@@ -30,6 +30,8 @@ VISIBILITY="${5:-private}"
 PYTHON_VERSION_MAX="${6:-}"
 REPO_TOPICS="${7:-}"
 
+[[ "$PYTHON_VERSION_MAX" == "none" ]] && PYTHON_VERSION_MAX=""
+[[ "$REPO_TOPICS" == "none" ]] && REPO_TOPICS=""
 
 # Normalize visibility
 if [[ "$VISIBILITY" != "public" && "$VISIBILITY" != "private" ]]; then

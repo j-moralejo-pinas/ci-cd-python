@@ -29,14 +29,19 @@ gh repo create "$REPO_NAME" \
     --description "$DESCRIPTION" \
     --$VISIBILITY
 
-echo "Waiting for repository to be available..."
-for i in {1..10}; do
-    if gh repo view "$REPO_NAME" >/dev/null 2>&1; then
+echo "Waiting for repository to be populated from template..."
+OWNER=$(gh api user --jq '.login')
+for i in {1..20}; do
+    if gh api "repos/$OWNER/$REPO_NAME/commits" --jq '.[0].sha' >/dev/null 2>&1; then
         echo "Repository available."
         break
     fi
-    echo "Waiting for repository..."
-    sleep 2
+    if [[ $i -eq 20 ]]; then
+        echo "Error: Repository was not populated after 60 seconds."
+        exit 1
+    fi
+    echo "Waiting for template content... ($i/20)"
+    sleep 3
 done
 
 echo "Cloning repository to $PROJECTS_DIR/$REPO_NAME..."
