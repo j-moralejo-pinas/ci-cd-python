@@ -22,7 +22,7 @@ runs:
         fetch-depth: 0
 
     - name: Configure git user for tagging
-      uses: j-moralejo-pinas/ci-cd-python/actions/git-config@main
+      uses: j-moralejo-pinas/ci-cd-python/actions/git-config@v1
 
     - name: Tag merge commit
       shell: bash

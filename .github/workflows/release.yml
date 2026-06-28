@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Get workflow type from pyproject.toml
         id: get-workflow
-        uses: j-moralejo-pinas/ci-cd-python/actions/get-workflow-type@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/get-workflow-type@v1
 
   check-source-branch:
     name: check-source-branch
@@ -32,7 +32,7 @@ jobs:
     needs: get-workflow-type
     steps:
       - name: Validate source branch
-        uses: j-moralejo-pinas/ci-cd-python/actions/check-source-branch@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/check-source-branch@v1
         with:
           allowed_branches: ${{ needs.get-workflow-type.outputs.workflow_type == 'gitflow' && 'dev' || 'main' }}
 
@@ -43,7 +43,7 @@ jobs:
     if: needs.get-workflow-type.outputs.workflow_type == 'gitflow'
     steps:
       - name: Run create-branch action
-        uses: j-moralejo-pinas/ci-cd-python/actions/create-branch@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/create-branch@v1
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
           branch_name: ${{ inputs.release_type == 'major' && 'major' || 'release' }}/${{ github.sha }}
@@ -55,7 +55,7 @@ jobs:
     if: needs.get-workflow-type.outputs.workflow_type == 'gitflow'
     steps:
       - name: Run create-pr action
-        uses: j-moralejo-pinas/ci-cd-python/actions/create-pr@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/create-pr@v1
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
           gh_token: ${{ github.token }}
@@ -72,7 +72,7 @@ jobs:
     steps:
       - name: Calculate new version
         id: semver
-        uses: j-moralejo-pinas/ci-cd-python/actions/find-next-semver@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/find-next-semver@v1
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
           bump-type: ${{ inputs.release_type }}
@@ -88,7 +88,7 @@ jobs:
     steps:
       - name: Update changelog
         id: update-changelog
-        uses: j-moralejo-pinas/ci-cd-python/actions/update-changelog@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/update-changelog@v1
         with:
           workflow_type: ${{ needs.get-workflow-type.outputs.workflow_type }}
           pat_token: ${{ secrets.PAT_TOKEN }}
@@ -102,7 +102,7 @@ jobs:
     if: needs.get-workflow-type.outputs.workflow_type == 'trunk' || needs.get-workflow-type.outputs.workflow_type == 'github_flow'
     steps:
       - name: Run code quality action
-        uses: j-moralejo-pinas/ci-cd-python/actions/code-quality@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/code-quality@v1
 
   test:
     name: test
@@ -111,7 +111,7 @@ jobs:
     if: needs.get-workflow-type.outputs.workflow_type == 'trunk' || needs.get-workflow-type.outputs.workflow_type == 'github_flow'
     steps:
       - name: Run test action
-        uses: j-moralejo-pinas/ci-cd-python/actions/test@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/test@v1
 
   tag:
     name: tag
@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create tag with pre-calculated version
-        uses: j-moralejo-pinas/ci-cd-python/actions/semver-tag@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/semver-tag@v1
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
           commit-sha: ${{ needs.update-changelog.outputs.did_push == 'true' && needs.update-changelog.outputs.sha || github.sha }}

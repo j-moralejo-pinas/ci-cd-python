@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Verify branch is up to date
-        uses: j-moralejo-pinas/ci-cd-python/actions/check-up-to-date@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/check-up-to-date@v1
         with:
           target_branch: "main"
           ignore_patterns: "hotfix/*,main"
@@ -29,7 +29,7 @@ jobs:
     steps:
       - name: Get workflow type from pyproject.toml
         id: get-workflow
-        uses: j-moralejo-pinas/ci-cd-python/actions/get-workflow-type@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/get-workflow-type@v1
 
   check-source-branch:
     name: check-source-branch
@@ -37,7 +37,7 @@ jobs:
     needs: get-workflow-type
     steps:
       - name: Validate source branch
-        uses: j-moralejo-pinas/ci-cd-python/actions/check-source-branch@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/check-source-branch@v1
         with:
           allowed_branches: ${{ needs.get-workflow-type.outputs.workflow_type == 'gitflow' && 'dev' || '' }}
           allowed_prefixes: ${{ needs.get-workflow-type.outputs.workflow_type == 'gitflow' && 'hotfix/,release/,meta/,major/' || 'feature/,bugfix/,fix/,hotfix/,release/,meta/,major/' }}
@@ -53,7 +53,7 @@ jobs:
     steps:
       - name: Calculate new version
         id: semver
-        uses: j-moralejo-pinas/ci-cd-python/actions/find-next-semver@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/find-next-semver@v1
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
 
@@ -67,7 +67,7 @@ jobs:
       - name: Update changelog
         if: startsWith(github.head_ref, 'hotfix/') || startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'major/')
         id: update-changelog
-        uses: j-moralejo-pinas/ci-cd-python/actions/update-changelog@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/update-changelog@v1
         with:
           workflow_type: ${{ needs.get-workflow-type.outputs.workflow_type }}
           pat_token: ${{ secrets.PAT_TOKEN }}
@@ -84,7 +84,7 @@ jobs:
     steps:
       - name: Run format action
         id: format
-        uses: j-moralejo-pinas/ci-cd-python/actions/format@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/format@v1
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
 
@@ -95,7 +95,7 @@ jobs:
     if: needs.format.outputs.did_push != 'true'
     steps:
       - name: Run code quality action
-        uses: j-moralejo-pinas/ci-cd-python/actions/code-quality@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/code-quality@v1
 
   test:
     name: test
@@ -103,4 +103,4 @@ jobs:
     needs: [get-workflow-type, code-quality]
     steps:
       - name: Run test action
-        uses: j-moralejo-pinas/ci-cd-python/actions/test@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/test@v1

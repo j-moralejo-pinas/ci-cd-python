@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Get workflow type from pyproject.toml
         id: get-workflow
-        uses: j-moralejo-pinas/ci-cd-python/actions/get-workflow-type@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/get-workflow-type@v1
 
   code-quality:
     name: code-quality
@@ -27,7 +27,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Run code quality action
-        uses: j-moralejo-pinas/ci-cd-python/actions/code-quality@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/code-quality@v1
 
   test:
     name: test
@@ -35,4 +35,4 @@ jobs:
     needs: [get-workflow-type, code-quality]
     steps:
       - name: Run test action
-        uses: j-moralejo-pinas/ci-cd-python/actions/test@main
+        uses: j-moralejo-pinas/ci-cd-python/actions/test@v1

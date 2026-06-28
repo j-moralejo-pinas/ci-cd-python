@@ -45,7 +45,7 @@ runs:
     - name: Detect branch type
       id: branch-type
       if: ${{ inputs.bump-type == '' || inputs.bump-type == 'auto' }}
-      uses: j-moralejo-pinas/ci-cd-python/actions/detect-branch-type@main
+      uses: j-moralejo-pinas/ci-cd-python/actions/detect-branch-type@v1
       with:
         head-branch: ${{ github.event.pull_request.head.ref || github.ref_name }}
         major-branch-patterns: ${{ inputs.major-branch-patterns }}
