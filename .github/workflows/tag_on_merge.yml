@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Get workflow type from pyproject.toml
         id: get-workflow
-        uses: j-moralejo-pinas/ci-cd-python/actions/get-workflow-type@v1
+        uses: j-moralejo-pinas/ci-cd-python/actions/get-workflow-type@main
 
   calculate-version:
     name: calculate-version
@@ -39,7 +39,7 @@ jobs:
     steps:
       - name: Calculate new version
         id: semver
-        uses: j-moralejo-pinas/ci-cd-python/actions/find-next-semver@v1
+        uses: j-moralejo-pinas/ci-cd-python/actions/find-next-semver@main
         with:
           pat_token: ${{ secrets.PAT_TOKEN }}
 
@@ -60,4 +60,4 @@ jobs:
           pat_token: ${{ secrets.PAT_TOKEN }}
           commit-sha: ${{ (startsWith(github.event.pull_request.head.ref, 'hotfix/') && needs.get-workflow-type.outputs.workflow_type != 'gitflow') && github.event.pull_request.head.sha || github.event.pull_request.merge_commit_sha }}
           new_tag: ${{ needs.calculate-version.outputs.new_tag }}
-        uses: j-moralejo-pinas/ci-cd-python/actions/semver-tag@v1
+        uses: j-moralejo-pinas/ci-cd-python/actions/semver-tag@main

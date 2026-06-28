@@ -29,7 +29,7 @@ runs:
   using: composite
   steps:
     - name: Configure Git user
-      uses: j-moralejo-pinas/ci-cd-python/actions/git-config@v1
+      uses: j-moralejo-pinas/ci-cd-python/actions/git-config@main
 
     - name: Commit changes if any
       id: commit

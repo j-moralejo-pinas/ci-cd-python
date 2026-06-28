@@ -27,7 +27,7 @@ runs:
 
     - name: Get minimum Python version
       id: python-version
-      uses: j-moralejo-pinas/ci-cd-python/actions/get-min-python-version@v1
+      uses: j-moralejo-pinas/ci-cd-python/actions/get-min-python-version@main
 
     - name: Set up Python
       uses: actions/setup-python@v5

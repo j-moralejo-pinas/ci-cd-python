@@ -42,21 +42,21 @@ runs:
     # Detect last version present in CHANGELOG.rst (first header starting with '## vX.Y.Z - YYYY-MM-DD')
     - name: Determine last CHANGELOG version
       id: changelog_last
-      uses: j-moralejo-pinas/ci-cd-python/actions/get-last-changelog-version@v1
+      uses: j-moralejo-pinas/ci-cd-python/actions/get-last-changelog-version@main
       with:
         changelog_path: ${{ inputs.changelog_path }}
 
     # Compare versions (semantic): result only if new_tag > last_tag
     - name: Check if new version is above last changelog version
       id: should_run
-      uses: j-moralejo-pinas/ci-cd-python/actions/compare-versions@v1
+      uses: j-moralejo-pinas/ci-cd-python/actions/compare-versions@main
       with:
         new_tag: ${{ inputs.new_tag }}
         last_tag: ${{ steps.changelog_last.outputs.last_tag }}
 
     - name: Build and prepend changelog slice
       if: ${{ steps.should_run.outputs.result == 'true' }}
-      uses: j-moralejo-pinas/ci-cd-python/actions/update-changelog-slice@v1
+      uses: j-moralejo-pinas/ci-cd-python/actions/update-changelog-slice@main
       with:
         token: ${{ inputs.gh_token }}
         version: ${{ inputs.new_tag }}
@@ -64,7 +64,7 @@ runs:
 
     - name: Commit and push changelog
       id: commit_push
-      uses: j-moralejo-pinas/ci-cd-python/actions/commit-push@v1
+      uses: j-moralejo-pinas/ci-cd-python/actions/commit-push@main
       with:
         pat: ${{ inputs.pat_token }}
         message: "chore: update changelog for ${{ inputs.new_tag }}"
