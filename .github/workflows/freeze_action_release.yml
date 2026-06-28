@@ -1,0 +1,73 @@
+name: freeze_action_release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: freeze-action-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: release
+    if: startsWith(github.event.head_commit.message, 'release')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Calculate next release tag
+        id: version
+        run: |
+          LATEST_TAG="$(git tag -l 'v[0-9]*' --sort=-version:refname | grep -E '^v[0-9]+$' | head -n1 || true)"
+
+          if [[ -z "$LATEST_TAG" ]]; then
+            NEW_TAG="v1"
+          else
+            VERSION="${LATEST_TAG#v}"
+            NEW_TAG="v$((VERSION + 1))"
+          fi
+
+          echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Pin internal action refs to release tag
+        run: scripts/pin_internal_action_refs.sh "${{ steps.version.outputs.new_tag }}"
+
+      - name: Commit release refs
+        run: |
+          git diff --quiet && {
+            echo "No internal refs changed."
+            exit 1
+          }
+
+          git add .github/workflows actions
+          git commit -m "chore: pin internal action refs for ${{ steps.version.outputs.new_tag }}"
+
+      - name: Tag release commit
+        run: git tag "${{ steps.version.outputs.new_tag }}"
+
+      - name: Push release commit and tag
+        run: |
+          git push origin HEAD:main
+          git push origin "${{ steps.version.outputs.new_tag }}"
+
+      - name: Restore internal action refs to main
+        run: scripts/pin_internal_action_refs.sh main
+
+      - name: Commit restored refs
+        run: |
+          git add .github/workflows actions
+          git commit -m "chore: restore internal action refs to main after ${{ steps.version.outputs.new_tag }}"
+          git push origin HEAD:main
