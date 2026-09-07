@@ -1,104 +1,77 @@
 #!/usr/bin/env bash
-# Full repository creation and configuration script
-# Combines create_repo.sh and local-configure-repo.sh into one workflow
+# Create a GitHub repository, scaffold it with Copier, and apply repository settings.
 #
-# Usage: create_and_configure_repo.sh <name> "description" <python_version> <workflow> \
-#        [python_version_max] [repo_topics] [public|private]
-#
-# Required arguments:
-#   <name>                 Repository name
-#   "description"          Repository description
-#   <python_version>       Minimum Python version (e.g., "3.11")
-#   <workflow>             Workflow type (see local-configure-repo.sh for available options)
-#
-# Optional arguments:
-#   [python_version_max]   Maximum Python version (e.g., "3.12")
-#   [repo_topics]          Repository topics (comma-separated)
-#   [public|private]       Repository visibility (default: private)
+# Usage: create_and_configure_repo.sh <name> "description" <python_min> <workflow> \
+#        [public|private] [python_max] [repo_topics]
 
-set -e
-
-# ============================================
-# Parse arguments
-# ============================================
-
-REPO_NAME="${1:?Error: Repository name is required}"
-DESCRIPTION="${2:?Error: Repository description is required}"
-PYTHON_VERSION="${3:?Error: Python version is required}"
-WORKFLOW="${4:?Error: Workflow is required}"
-VISIBILITY="${5:-private}"
-PYTHON_VERSION_MAX="${6:-}"
-REPO_TOPICS="${7:-}"
-
-[[ "$PYTHON_VERSION_MAX" == "none" ]] && PYTHON_VERSION_MAX=""
-[[ "$REPO_TOPICS" == "none" ]] && REPO_TOPICS=""
-
-# Normalize visibility
-if [[ "$VISIBILITY" != "public" && "$VISIBILITY" != "private" ]]; then
-    echo "Invalid visibility '$VISIBILITY'. Use 'public' or 'private'."
-    exit 1
-fi
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECTS_DIR="$HOME/projects"
+PROJECTS_DIR="${PROJECTS_DIR:-$HOME/projects}"
 
-echo "=========================================="
-echo "Full Repository Setup Script"
-echo "=========================================="
-echo "Repository: $REPO_NAME"
-echo "Description: $DESCRIPTION"
-echo "Visibility: $VISIBILITY"
-echo "Python version: $PYTHON_VERSION"
-echo "Python max version: ${PYTHON_VERSION_MAX:-'Not specified'}"
-echo "Topics: ${REPO_TOPICS:-'Not specified'}"
-echo "Workflow: $WORKFLOW"
-echo "=========================================="
-echo ""
+REPO_NAME="${1:?Repository name is required}"
+DESCRIPTION="${2:?Repository description is required}"
+PYTHON_MIN="${3:?Minimum Python version is required}"
+WORKFLOW="${4:?Workflow is required}"
+VISIBILITY="${5:-private}"
+PYTHON_MAX="${6:-}"
+REPO_TOPICS="${7:-}"
 
-# ============================================
-# Step 1: Create repository from template
-# ============================================
+[[ "$PYTHON_MAX" == "none" ]] && PYTHON_MAX=""
+[[ "$REPO_TOPICS" == "none" ]] && REPO_TOPICS=""
 
-echo "Step 1: Creating GitHub repository from template..."
-bash "$SCRIPT_DIR/create_repo.sh" "$REPO_NAME" "$DESCRIPTION" "$VISIBILITY"
+for command in direnv nix gh; do
+    if ! command -v "$command" >/dev/null; then
+        echo "Error: $command is not installed or not in PATH." >&2
+        exit 1
+    fi
+done
 
-echo ""
-echo "✓ Repository created successfully"
-echo ""
+if ! gh auth status >/dev/null 2>&1; then
+    echo "Error: gh CLI is not authenticated. Run 'gh auth login' first." >&2
+    exit 1
+fi
 
-# ============================================
-# Step 2: Configure repository
-# ============================================
+if ! git config user.name >/dev/null; then
+    echo "Error: git user.name is not configured." >&2
+    exit 1
+fi
 
+if ! git config user.email >/dev/null; then
+    echo "Error: git user.email is not configured." >&2
+    exit 1
+fi
+
+bash "$SCRIPT_DIR/create_repo.sh" \
+    "$REPO_NAME" \
+    "$DESCRIPTION" \
+    "$VISIBILITY" \
+    "$PYTHON_MIN" \
+    "$PYTHON_MAX" \
+    "$REPO_TOPICS" \
+    "$WORKFLOW"
+
+OWNER=$(gh api user --jq '.login')
+REPO_SLUG="$OWNER/$REPO_NAME"
 REPO_PATH="$PROJECTS_DIR/$REPO_NAME"
 
-if [ ! -d "$REPO_PATH" ]; then
-    echo "Error: Repository directory not found at $REPO_PATH"
-    exit 1
+echo "Applying GitHub repository settings..."
+bash "$SCRIPT_DIR/configure_repo.sh" "$REPO_SLUG" "$WORKFLOW" "$REPO_TOPICS"
+
+if [[ "$WORKFLOW" == "gitflow" ]]; then
+    echo "Creating dev branch..."
+    git -C "$REPO_PATH" checkout -b dev
+    git -C "$REPO_PATH" push -u origin dev
+    git -C "$REPO_PATH" checkout main
 fi
 
-echo "Step 2: Configuring repository..."
-cd "$REPO_PATH"
+echo "Setting up the local development environment..."
+(
+    cd "$REPO_PATH"
+    direnv allow .
+    eval "$(direnv export bash)"
+    ./setup-dev.sh
+)
 
-# Check if local-configure-repo.sh exists
-if [ ! -f "scripts/init/local-configure-repo.sh" ]; then
-    echo "Error: local-configure-repo.sh not found at scripts/init/local-configure-repo.sh"
-    exit 1
-fi
-
-# Run the configuration script
-bash scripts/init/local-configure-repo.sh \
-    "$PYTHON_VERSION" \
-    "$WORKFLOW" \
-    "$PYTHON_VERSION_MAX" \
-    "$REPO_TOPICS"
-
-echo ""
-echo "=========================================="
-echo "✓ Repository setup completed successfully!"
-echo "=========================================="
-echo "Repository location: $REPO_PATH"
-echo ""
-
-# Open the repository in VS Code
-code .
+echo "Repository setup completed: $REPO_PATH"
+code "$REPO_PATH"
